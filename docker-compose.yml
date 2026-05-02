@@ -1,0 +1,7 @@
+services:
+  nba-bingo:
+    build: .
+    container_name: nba-bingo
+    ports:
+      - "8080:80"
+    restart: unless-stopped
