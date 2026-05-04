@@ -13,6 +13,7 @@ const ConnStatus = {
 }
 
 let socket = null
+let abortController = null
 let tickerHandle = null
 
 function loadStoredName() {
@@ -31,6 +32,7 @@ export const useMultiplayerStore = defineStore('multiplayer', {
     connStatus: ConnStatus.IDLE,
     error: null,
     nowMs: Date.now(),
+    pendingAction: false,
   }),
 
   getters: {
@@ -45,7 +47,9 @@ export const useMultiplayerStore = defineStore('multiplayer', {
     currentPlayer: (s) => s.roomState?.currentPlayer ?? null,
     turnIndex: (s) => s.roomState?.turnIndex ?? 0,
     sequenceLength: (s) => s.roomState?.sequenceLength ?? 0,
-    actedThisTurn: (s) => s.roomState?.actedThisTurn === true,
+    isDone: (s) => s.roomState?.isDone === true,
+    doneCount: (s) => s.roomState?.doneCount ?? 0,
+    totalPlayers: (s) => s.roomState?.totalPlayers ?? 0,
     rules: (s) =>
       s.roomState?.rules ?? {
         secondsPerTurn: 10,
@@ -102,6 +106,9 @@ export const useMultiplayerStore = defineStore('multiplayer', {
       this.roomCode = code
       this.connStatus = ConnStatus.CONNECTING
 
+      abortController = new AbortController()
+      const { signal } = abortController
+
       socket = new PartySocket({
         host: HOST,
         room: code,
@@ -111,7 +118,7 @@ export const useMultiplayerStore = defineStore('multiplayer', {
         this.connStatus = ConnStatus.CONNECTED
         this._send({ type: 'join', name: this.playerName })
         this._startTicker()
-      })
+      }, { signal })
       socket.addEventListener('message', (event) => {
         let msg
         try {
@@ -121,21 +128,32 @@ export const useMultiplayerStore = defineStore('multiplayer', {
         }
         if (msg.type === 'state') {
           this.roomState = msg.state
+          // Tout state reçu = le serveur a traité notre dernière action
+          this.pendingAction = false
         }
-      })
+      }, { signal })
       socket.addEventListener('close', () => {
+        // partysocket reconnecte automatiquement ; on tombe en CLOSED
+        // mais on garde roomState pour ne pas casser la UI le temps de
+        // la reco. L'event 'open' suivant remettra à CONNECTED.
         this.connStatus = ConnStatus.CLOSED
         this._stopTicker()
-      })
+      }, { signal })
       socket.addEventListener('error', () => {
         this.connStatus = ConnStatus.ERROR
         this.error = `Connexion impossible à ${HOST}`
         this._stopTicker()
-      })
+      }, { signal })
     },
 
     disconnect() {
       this._stopTicker()
+      // AbortController détache TOUS les listeners de l'ancien socket
+      // avant qu'on le close — pas de close() qui retombe sur le nouveau.
+      if (abortController) {
+        abortController.abort()
+        abortController = null
+      }
       if (socket) {
         try { socket.close() } catch {}
         socket = null
@@ -143,12 +161,24 @@ export const useMultiplayerStore = defineStore('multiplayer', {
       this.roomState = null
       this.connStatus = ConnStatus.IDLE
       this.roomCode = null
+      this.error = null
     },
 
     start() { this._send({ type: 'start' }) },
-    place(cellId) { this._send({ type: 'place', cellId }) },
-    skip() { this._send({ type: 'skip' }) },
-    restart() { this._send({ type: 'restart' }) },
+    place(cellId) {
+      if (this.pendingAction || this.isDone) return
+      this.pendingAction = true
+      this._send({ type: 'place', cellId })
+    },
+    skip() {
+      if (this.pendingAction || this.isDone) return
+      this.pendingAction = true
+      this._send({ type: 'skip' })
+    },
+    restart() {
+      this.pendingAction = false
+      this._send({ type: 'restart' })
+    },
 
     _send(payload) {
       if (socket && this.isConnected) {

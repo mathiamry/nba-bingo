@@ -26,14 +26,19 @@ const {
   currentPlayer,
   turnIndex,
   sequenceLength,
-  actedThisTurn,
+  isDone,
+  doneCount,
+  totalPlayers,
   rules,
-  timeLeftMs,
   timerProgress,
   myScore,
   won,
   playerName,
+  roomState,
+  pendingAction,
 } = storeToRefs(mp)
+
+const timeLeftSeconds = computed(() => Math.max(0, mp.timeLeftMs / 1000))
 
 const inputName = ref(playerName.value || '')
 const showCopied = ref(false)
@@ -81,12 +86,28 @@ const placedCount = computed(() => {
 })
 
 const cellGridDisabled = computed(
-  () => serverPhase.value !== 'playing' || actedThisTurn.value || !currentPlayer.value,
+  () =>
+    serverPhase.value !== 'playing' ||
+    isDone.value ||
+    pendingAction.value ||
+    !currentPlayer.value,
 )
 
-const timeLeftSeconds = computed(() => Math.max(0, timeLeftMs.value / 1000))
+// Erreur "dure" qui mérite le bandeau rouge bloquant :
+// - vraie erreur réseau
+// - close prolongé sans aucun state reçu (la connexion n'a jamais abouti)
+const fatalError = computed(() => {
+  if (connStatus.value === ConnStatus.ERROR) return true
+  if (connStatus.value === ConnStatus.CLOSED && !roomState.value) return true
+  return false
+})
 
-const errorOpen = computed(() => connStatus.value === ConnStatus.ERROR || connStatus.value === ConnStatus.CLOSED)
+// Petit badge "reconnexion…" pour les coupures transitoires (partysocket
+// reconnecte automatiquement, on garde le dernier state pour ne pas
+// flasher la UI).
+const reconnecting = computed(
+  () => connStatus.value === ConnStatus.CLOSED && !!roomState.value,
+)
 </script>
 
 <template>
@@ -132,9 +153,9 @@ const errorOpen = computed(() => connStatus.value === ConnStatus.ERROR || connSt
       </div>
     </div>
 
-    <!-- État connexion / erreur -->
+    <!-- Erreur dure : bandeau rouge bloquant -->
     <div
-      v-if="errorOpen"
+      v-if="fatalError"
       class="bg-bingo-cellLocked/20 border border-bingo-cellLocked rounded-xl p-3 text-sm flex items-center justify-between gap-3"
     >
       <span>{{ error || 'Connexion fermée.' }}</span>
@@ -143,6 +164,16 @@ const errorOpen = computed(() => connStatus.value === ConnStatus.ERROR || connSt
         @click="mp.connect(props.roomCode)"
       >Réessayer</button>
     </div>
+
+    <!-- Coupure transitoire : petit badge non bloquant -->
+    <div
+      v-else-if="reconnecting"
+      class="bg-yellow-400/15 border border-yellow-400/40 rounded-lg px-3 py-1.5 text-xs flex items-center gap-2"
+    >
+      <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+      <span class="opacity-80">Reconnexion…</span>
+    </div>
+
     <div
       v-else-if="connStatus === 'connecting' && playerName"
       class="text-center opacity-60 py-4 text-sm"
@@ -184,7 +215,9 @@ const errorOpen = computed(() => connStatus.value === ConnStatus.ERROR || connSt
         :total="rules.gridSize"
       />
 
+      <!-- Joueur courant + timer perso (caché si on a fini) -->
       <PlayerCard
+        v-if="!isDone"
         :player="currentPlayer"
         :turn-index="turnIndex"
         :total-turns="sequenceLength"
@@ -193,9 +226,18 @@ const errorOpen = computed(() => connStatus.value === ConnStatus.ERROR || connSt
         @skip="mp.skip()"
       />
 
-      <p v-if="actedThisTurn" class="text-center text-xs opacity-60">
-        En attente des autres joueurs…
-      </p>
+      <!-- Tu as fini, on attend les autres -->
+      <div
+        v-else
+        class="bg-bingo-cell/10 border border-bingo-cell/40 rounded-2xl p-4 text-center"
+      >
+        <div class="text-bingo-cell font-extrabold uppercase tracking-widest text-sm mb-1">
+          Tu as terminé !
+        </div>
+        <div class="text-xs opacity-70">
+          En attente des autres joueurs… ({{ doneCount }} / {{ totalPlayers }} ont fini)
+        </div>
+      </div>
 
       <div v-if="cells.length === 16" class="grid grid-cols-4 gap-2">
         <GridCell

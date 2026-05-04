@@ -1,15 +1,12 @@
 /**
  * NBA Bingo — serveur PartyKit (Cloudflare Workers + Durable Objects).
  *
- * Cycle d'une room :
- *   lobby → playing → ended → (host restart) → lobby
- *
- * Règles :
- * - Tout le monde voit la même grille et le même joueur proposé.
- * - Timer authoritatif côté serveur (10s). Si tous ont placé/passé avant,
- *   on avance plus vite.
- * - Le booléen `wasCorrect` est masqué pendant la partie (rouge révélé
- *   uniquement à la fin) → comme la version solo.
+ * MODE RACE ASYNC :
+ * - Tout le monde joue la MÊME grille avec la MÊME séquence de joueurs.
+ * - Chacun progresse à SON rythme (turn index par joueur, timer par joueur).
+ * - La partie se termine globalement quand TOUS les joueurs ont fini
+ *   (grille pleine OU séquence épuisée).
+ * - Les erreurs restent vertes pendant le jeu, révélées en rouge à la fin.
  * - Score = nb cases correctes × pointsPerCell (3.75 → max 60).
  */
 
@@ -60,7 +57,7 @@ type Player = {
 };
 
 type Placement = {
-  cellId: string | null; // null = skip / timeout
+  cellId: string | null;
   wasCorrect: boolean | null;
   turnIndex: number;
 };
@@ -70,14 +67,16 @@ type RoomState = {
   hostId: string | null;
   players: Record<string, Player>;
   game: Game | null;
-  turnIndex: number;
-  turnEndsAt: number; // ms epoch
-  placements: Record<string, Placement[]>; // playerId → liste chronologique
+  // Progression INDIVIDUELLE par joueur (race async)
+  playerTurnIndex: Record<string, number>;
+  playerTurnEndsAt: Record<string, number>;
+  playerDone: Record<string, boolean>;
+  placements: Record<string, Placement[]>;
 };
 
-// ─── Vue par joueur (cache wasCorrect pendant la partie) ─────────────────
+// ─── Vue par destinataire ────────────────────────────────────────────────
 
-type PublicCellState = {
+type CellView = {
   status: "empty" | "filled" | "wrong";
   playerName: string | null;
   turnIndex: number | null;
@@ -86,73 +85,81 @@ type PublicCellState = {
 type LeaderboardEntry = {
   id: string;
   name: string;
-  placed: number;     // cases posées (correctes + erronées)
-  correct: number;    // visible seulement quand status === "ended"
-  score: number;      // visible seulement quand status === "ended"
+  placed: number;
+  done: boolean;
+  correct: number; // 0 tant que reveal=false
+  score: number;   // idem
 };
 
 function viewForRecipient(state: RoomState, recipientId: string) {
   const reveal = state.status === "ended";
-  const cells: Record<string, PublicCellState> = {};
+  const myTurn = state.playerTurnIndex[recipientId] ?? 0;
+  const myEndsAt = state.playerTurnEndsAt[recipientId] ?? 0;
+  const myDone = state.playerDone[recipientId] === true;
+  const myPlacements = state.placements[recipientId] || [];
+
+  // Grille du destinataire (uniquement SES placements visibles)
+  const cellStates: Record<string, CellView> = {};
   if (state.game) {
     for (const c of state.game.cells) {
-      cells[c.id] = { status: "empty", playerName: null, turnIndex: null };
+      cellStates[c.id] = { status: "empty", playerName: null, turnIndex: null };
+    }
+    for (const p of myPlacements) {
+      if (p.cellId === null) continue;
+      const visualStatus =
+        reveal && p.wasCorrect === false ? "wrong" : "filled";
+      cellStates[p.cellId] = {
+        status: visualStatus,
+        playerName: state.game.sequence[p.turnIndex]?.name ?? null,
+        turnIndex: p.turnIndex,
+      };
     }
   }
 
-  // Reconstitue l'état de la grille du recipient
-  const myPlacements = state.placements[recipientId] || [];
-  for (const p of myPlacements) {
-    if (p.cellId === null) continue;
-    const visualStatus =
-      reveal && p.wasCorrect === false ? "wrong" : "filled";
-    cells[p.cellId] = {
-      status: visualStatus,
-      playerName: state.game?.sequence[p.turnIndex]?.name ?? null,
-      turnIndex: p.turnIndex,
-    };
-  }
+  // Joueur actuel = sequence[mon turnIndex] (chacun voit le sien)
+  const currentPlayer =
+    state.game && state.status === "playing" && !myDone
+      ? state.game.sequence[myTurn] ?? null
+      : null;
 
-  // Leaderboard : nombre de placements (visible toujours), score (final only)
+  // Leaderboard : progression de tous (placed = posées, done flag, score au reveal)
   const leaderboard: LeaderboardEntry[] = Object.values(state.players).map(
     (p) => {
-      const placements = state.placements[p.id] || [];
-      const placed = placements.filter((pl) => pl.cellId !== null).length;
-      const correct = placements.filter((pl) => pl.wasCorrect === true).length;
+      const places = state.placements[p.id] || [];
+      const placed = places.filter((pl) => pl.cellId !== null).length;
+      const correct = places.filter((pl) => pl.wasCorrect === true).length;
       return {
         id: p.id,
         name: p.name,
         placed,
+        done: state.playerDone[p.id] === true,
         correct: reveal ? correct : 0,
         score: reveal ? correct * POOL.rules.pointsPerCell : 0,
       };
     },
   );
 
-  // Le client doit savoir s'il a déjà agi sur le tour courant (lock UI)
-  const actedThisTurn = myPlacements.some(
-    (p) => p.turnIndex === state.turnIndex,
-  );
+  const totalPlayers = Object.keys(state.players).length;
+  const doneCount = Object.values(state.playerDone).filter(Boolean).length;
 
   return {
     status: state.status,
     hostId: state.hostId,
     selfId: recipientId,
     isHost: state.hostId === recipientId,
+    isDone: myDone,
+    doneCount,
+    totalPlayers,
     players: Object.values(state.players).sort(
       (a, b) => a.joinedAt - b.joinedAt,
     ),
     cells: state.game?.cells ?? [],
-    cellStates: cells,
+    cellStates,
     sequenceLength: state.game?.sequence.length ?? 0,
-    currentPlayer:
-      state.game && state.status === "playing"
-        ? state.game.sequence[state.turnIndex] ?? null
-        : null,
-    turnIndex: state.turnIndex,
-    turnEndsAt: state.turnEndsAt,
+    currentPlayer,
+    turnIndex: myTurn,
+    turnEndsAt: myEndsAt,
     serverTime: Date.now(),
-    actedThisTurn,
     leaderboard,
     rules: POOL.rules,
   };
@@ -162,7 +169,7 @@ function viewForRecipient(state: RoomState, recipientId: string) {
 
 export default class NbaBingoServer implements Party.Server {
   state: RoomState;
-  turnTimer: ReturnType<typeof setTimeout> | null = null;
+  playerTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
   constructor(readonly room: Party.Room) {
     this.state = {
@@ -170,13 +177,12 @@ export default class NbaBingoServer implements Party.Server {
       hostId: null,
       players: {},
       game: null,
-      turnIndex: 0,
-      turnEndsAt: 0,
+      playerTurnIndex: {},
+      playerTurnEndsAt: {},
+      playerDone: {},
       placements: {},
     };
   }
-
-  // ─── Lifecycle ─────────────────────────────────────────────────────────
 
   onConnect(conn: Party.Connection) {
     this.sendStateTo(conn);
@@ -212,91 +218,72 @@ export default class NbaBingoServer implements Party.Server {
     }
   }
 
-  // ─── Handlers ──────────────────────────────────────────────────────────
+  // ─── Lobby ─────────────────────────────────────────────────────────────
 
   handleJoin(conn: Party.Connection, name: string) {
     if (!name) return;
-    if (!this.state.players[conn.id]) {
+    const isNew = !this.state.players[conn.id];
+    if (isNew) {
       this.state.players[conn.id] = {
         id: conn.id,
         name,
         joinedAt: Date.now(),
       };
       this.state.placements[conn.id] = [];
+      this.state.playerTurnIndex[conn.id] = 0;
+      this.state.playerTurnEndsAt[conn.id] = 0;
+      this.state.playerDone[conn.id] = false;
       if (!this.state.hostId) this.state.hostId = conn.id;
     } else {
-      // Rename d'un participant existant (rare, mais safe)
       this.state.players[conn.id].name = name;
+    }
+    // Si la partie est en cours et qu'il vient d'arriver, on le lance aussi.
+    if (isNew && this.state.status === "playing" && this.state.game) {
+      this.beginPlayerTurn(conn.id);
     }
     this.broadcast();
   }
 
   removePlayer(id: string) {
     if (!this.state.players[id]) return;
+    this.clearPlayerTimer(id);
     delete this.state.players[id];
     delete this.state.placements[id];
+    delete this.state.playerTurnIndex[id];
+    delete this.state.playerTurnEndsAt[id];
+    delete this.state.playerDone[id];
     if (this.state.hostId === id) {
       const remaining = Object.keys(this.state.players);
       this.state.hostId = remaining[0] ?? null;
     }
     if (Object.keys(this.state.players).length === 0) {
       this.resetToLobby();
+    } else if (this.state.status === "playing" && this.allPlayersDone()) {
+      this.endGame();
+      return;
     }
     this.broadcast();
   }
+
+  // ─── Start / restart ───────────────────────────────────────────────────
 
   handleStart(sender: Party.Connection) {
     if (sender.id !== this.state.hostId) return;
     if (this.state.status !== "lobby") return;
     if (Object.keys(this.state.players).length === 0) return;
-
     if (POOL.games.length === 0) return;
-    const pick = POOL.games[Math.floor(Math.random() * POOL.games.length)];
-    this.state.game = pick;
+
+    this.state.game = POOL.games[Math.floor(Math.random() * POOL.games.length)];
     this.state.status = "playing";
-    this.state.turnIndex = 0;
-    for (const id of Object.keys(this.state.placements)) {
+
+    for (const id of Object.keys(this.state.players)) {
       this.state.placements[id] = [];
+      this.state.playerTurnIndex[id] = 0;
+      this.state.playerTurnEndsAt[id] = 0;
+      this.state.playerDone[id] = false;
+      this.beginPlayerTurn(id);
     }
-    this.beginTurn();
-  }
-
-  handlePlace(sender: Party.Connection, cellId: string) {
-    if (this.state.status !== "playing" || !this.state.game) return;
-    const playerId = sender.id;
-    if (!this.state.players[playerId]) return;
-
-    const placements = this.state.placements[playerId] || [];
-    if (placements.some((p) => p.turnIndex === this.state.turnIndex)) return;
-    if (placements.some((p) => p.cellId === cellId)) return;
-
-    const seq = this.state.game.sequence[this.state.turnIndex];
-    if (!seq) return;
-    const wasCorrect = seq.validCellIds.includes(cellId);
-    placements.push({
-      cellId,
-      wasCorrect,
-      turnIndex: this.state.turnIndex,
-    });
-    this.state.placements[playerId] = placements;
     this.broadcast();
-    this.maybeAdvanceTurn();
-  }
-
-  handleSkip(sender: Party.Connection) {
-    if (this.state.status !== "playing" || !this.state.game) return;
-    const playerId = sender.id;
-    if (!this.state.players[playerId]) return;
-    const placements = this.state.placements[playerId] || [];
-    if (placements.some((p) => p.turnIndex === this.state.turnIndex)) return;
-    placements.push({
-      cellId: null,
-      wasCorrect: null,
-      turnIndex: this.state.turnIndex,
-    });
-    this.state.placements[playerId] = placements;
-    this.broadcast();
-    this.maybeAdvanceTurn();
   }
 
   handleRestart(sender: Party.Connection) {
@@ -306,72 +293,125 @@ export default class NbaBingoServer implements Party.Server {
     this.broadcast();
   }
 
-  // ─── Turn loop ─────────────────────────────────────────────────────────
+  resetToLobby() {
+    for (const id of this.playerTimers.keys()) this.clearPlayerTimer(id);
+    this.state.status = "lobby";
+    this.state.game = null;
+    for (const id of Object.keys(this.state.players)) {
+      this.state.placements[id] = [];
+      this.state.playerTurnIndex[id] = 0;
+      this.state.playerTurnEndsAt[id] = 0;
+      this.state.playerDone[id] = false;
+    }
+  }
 
-  beginTurn() {
+  // ─── Per-player turn loop ──────────────────────────────────────────────
+
+  beginPlayerTurn(playerId: string) {
     if (!this.state.game) return;
+    if (this.state.status !== "playing") return;
+    if (this.state.playerDone[playerId]) return;
 
-    if (this.state.turnIndex >= this.state.game.sequence.length) {
-      return this.endGame();
+    const turn = this.state.playerTurnIndex[playerId] ?? 0;
+    if (turn >= this.state.game.sequence.length) {
+      this.markPlayerDone(playerId);
+      return;
+    }
+    const placed = (this.state.placements[playerId] || []).filter(
+      (p) => p.cellId !== null,
+    ).length;
+    if (placed >= POOL.rules.gridSize) {
+      this.markPlayerDone(playerId);
+      return;
     }
 
-    // Si tout le monde a déjà rempli sa grille → fin
-    const gridSize = POOL.rules.gridSize;
-    const everyoneFull = Object.keys(this.state.players).every((id) => {
-      const placed = (this.state.placements[id] || []).filter(
-        (p) => p.cellId !== null,
-      ).length;
-      return placed >= gridSize;
-    });
-    if (everyoneFull) return this.endGame();
+    this.state.playerTurnEndsAt[playerId] =
+      Date.now() + POOL.rules.secondsPerTurn * 1000;
+    this.clearPlayerTimer(playerId);
+    this.playerTimers.set(
+      playerId,
+      setTimeout(
+        () => this.advancePlayerTurn(playerId),
+        POOL.rules.secondsPerTurn * 1000,
+      ),
+    );
+  }
 
-    this.state.turnEndsAt = Date.now() + POOL.rules.secondsPerTurn * 1000;
+  advancePlayerTurn(playerId: string) {
+    if (!this.state.players[playerId]) return;
+    if (this.state.playerDone[playerId]) return;
+    this.clearPlayerTimer(playerId);
+    this.state.playerTurnIndex[playerId] =
+      (this.state.playerTurnIndex[playerId] ?? 0) + 1;
+    this.beginPlayerTurn(playerId);
     this.broadcast();
-
-    this.clearTurnTimer();
-    this.turnTimer = setTimeout(
-      () => this.advanceTurn(),
-      POOL.rules.secondsPerTurn * 1000,
-    );
   }
 
-  maybeAdvanceTurn() {
-    const turn = this.state.turnIndex;
-    const allActed = Object.keys(this.state.players).every((id) =>
-      (this.state.placements[id] || []).some((p) => p.turnIndex === turn),
-    );
-    if (allActed) this.advanceTurn();
+  markPlayerDone(playerId: string) {
+    if (!this.state.players[playerId]) return;
+    if (this.state.playerDone[playerId]) return;
+    this.clearPlayerTimer(playerId);
+    this.state.playerDone[playerId] = true;
+    this.state.playerTurnEndsAt[playerId] = 0;
+    if (this.allPlayersDone()) {
+      this.endGame();
+    }
   }
 
-  advanceTurn() {
-    this.clearTurnTimer();
-    this.state.turnIndex += 1;
-    this.beginTurn();
+  allPlayersDone(): boolean {
+    const ids = Object.keys(this.state.players);
+    if (ids.length === 0) return false;
+    return ids.every((id) => this.state.playerDone[id] === true);
   }
 
   endGame() {
-    this.clearTurnTimer();
+    for (const id of this.playerTimers.keys()) this.clearPlayerTimer(id);
     this.state.status = "ended";
-    this.state.turnEndsAt = 0;
     this.broadcast();
   }
 
-  clearTurnTimer() {
-    if (this.turnTimer) {
-      clearTimeout(this.turnTimer);
-      this.turnTimer = null;
+  clearPlayerTimer(playerId: string) {
+    const t = this.playerTimers.get(playerId);
+    if (t) {
+      clearTimeout(t);
+      this.playerTimers.delete(playerId);
     }
   }
 
-  resetToLobby() {
-    this.clearTurnTimer();
-    this.state.status = "lobby";
-    this.state.game = null;
-    this.state.turnIndex = 0;
-    this.state.turnEndsAt = 0;
-    for (const id of Object.keys(this.state.placements)) {
-      this.state.placements[id] = [];
-    }
+  // ─── Placements ────────────────────────────────────────────────────────
+
+  handlePlace(sender: Party.Connection, cellId: string) {
+    if (this.state.status !== "playing" || !this.state.game) return;
+    const playerId = sender.id;
+    if (!this.state.players[playerId]) return;
+    if (this.state.playerDone[playerId]) return;
+
+    const myTurn = this.state.playerTurnIndex[playerId] ?? 0;
+    const seq = this.state.game.sequence[myTurn];
+    if (!seq) return;
+
+    const placements = this.state.placements[playerId] || [];
+    if (placements.some((p) => p.cellId === cellId)) return;
+
+    const wasCorrect = seq.validCellIds.includes(cellId);
+    placements.push({ cellId, wasCorrect, turnIndex: myTurn });
+    this.state.placements[playerId] = placements;
+
+    this.advancePlayerTurn(playerId);
+  }
+
+  handleSkip(sender: Party.Connection) {
+    if (this.state.status !== "playing" || !this.state.game) return;
+    const playerId = sender.id;
+    if (!this.state.players[playerId]) return;
+    if (this.state.playerDone[playerId]) return;
+
+    const myTurn = this.state.playerTurnIndex[playerId] ?? 0;
+    const placements = this.state.placements[playerId] || [];
+    placements.push({ cellId: null, wasCorrect: null, turnIndex: myTurn });
+    this.state.placements[playerId] = placements;
+
+    this.advancePlayerTurn(playerId);
   }
 
   // ─── Wire ──────────────────────────────────────────────────────────────
