@@ -42,9 +42,13 @@ if os.path.isdir(NBA_API_PATH):
 
 def _import_nba_api():
     try:
-        from nba_api.stats.endpoints import commonteamroster, commonplayerinfo
+        from nba_api.stats.endpoints import (
+            commonteamroster,
+            commonplayerinfo,
+            playerawards,
+        )
         from nba_api.stats.static import teams
-        return commonteamroster, commonplayerinfo, teams
+        return commonteamroster, commonplayerinfo, playerawards, teams
     except ImportError as e:
         print(f"❌ nba_api introuvable. Vérifie que nba_api-master/src existe.")
         print(f"   Détail : {e}")
@@ -103,7 +107,31 @@ def fetch_player_info(commonplayerinfo_mod, player_id: int, retries: int = 2) ->
             if attempt < retries:
                 time.sleep(1.5)
                 continue
-            print(f"    ✗ player {player_id}: {e}")
+            print(f"    ✗ info player {player_id}: {e}")
+            return None
+
+
+def fetch_player_awards(playerawards_mod, player_id: int, retries: int = 2) -> Optional[list[dict]]:
+    """Récupère la liste des awards officiels d'un joueur (MVP, All-Star…)."""
+    for attempt in range(retries + 1):
+        try:
+            res = playerawards_mod.PlayerAwards(
+                player_id=player_id, timeout=20,
+            ).get_normalized_dict()
+            rows = res.get("PlayerAwards", []) or []
+            awards = []
+            for r in rows:
+                awards.append({
+                    "description": r.get("DESCRIPTION", ""),
+                    "season": r.get("SEASON", ""),
+                    "team": r.get("ALL_NBA_TEAM_NUMBER", ""),
+                })
+            return awards
+        except Exception as e:
+            if attempt < retries:
+                time.sleep(1.5)
+                continue
+            print(f"    ✗ awards player {player_id}: {e}")
             return None
 
 
@@ -113,23 +141,31 @@ def main():
                         help="Saison à fetcher (format YYYY-YY).")
     parser.add_argument("--with-info", action="store_true",
                         help="Fetch aussi country/draft par joueur (long).")
+    parser.add_argument("--with-awards", action="store_true",
+                        help="Fetch aussi les awards officiels par joueur (très long).")
     parser.add_argument("--sleep", type=float, default=0.7,
                         help="Pause entre requêtes (secondes).")
     args = parser.parse_args()
 
-    commonteamroster_mod, commonplayerinfo_mod, teams_mod = _import_nba_api()
+    (
+        commonteamroster_mod,
+        commonplayerinfo_mod,
+        playerawards_mod,
+        teams_mod,
+    ) = _import_nba_api()
 
     rosters = fetch_rosters(commonteamroster_mod, teams_mod, args.season, args.sleep)
     total = sum(len(v) for v in rosters.values())
     print(f"\n✅ {total} entrées roster fetchées pour {args.season}.")
 
+    unique_pids = sorted({
+        p["player_id"]
+        for plist in rosters.values()
+        for p in plist
+    })
+
     player_info: dict[str, dict] = {}
     if args.with_info:
-        unique_pids = sorted({
-            p["player_id"]
-            for plist in rosters.values()
-            for p in plist
-        })
         print(f"\n📥 Fetch metadata par joueur ({len(unique_pids)} joueurs, ~{len(unique_pids)*args.sleep:.0f}s)…")
         for i, pid in enumerate(unique_pids, 1):
             info = fetch_player_info(commonplayerinfo_mod, pid)
@@ -139,11 +175,23 @@ def main():
                 print(f"  {i}/{len(unique_pids)}")
             time.sleep(args.sleep)
 
+    player_awards: dict[str, list[dict]] = {}
+    if args.with_awards:
+        print(f"\n📥 Fetch awards par joueur ({len(unique_pids)} joueurs, ~{len(unique_pids)*args.sleep:.0f}s)…")
+        for i, pid in enumerate(unique_pids, 1):
+            awards = fetch_player_awards(playerawards_mod, pid)
+            if awards is not None:
+                player_awards[str(pid)] = awards
+            if i % 25 == 0:
+                print(f"  {i}/{len(unique_pids)}")
+            time.sleep(args.sleep)
+
     out = {
         "fetched_at": datetime.datetime.utcnow().isoformat() + "Z",
         "season": args.season,
         "rosters": rosters,
         "player_info": player_info,
+        "player_awards": player_awards,
     }
     out_path = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),

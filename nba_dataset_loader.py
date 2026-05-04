@@ -19,6 +19,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+from dataclasses import replace
 from collections import defaultdict
 from typing import Optional
 
@@ -1126,6 +1127,134 @@ def _aggregate_historical(rows: list[dict]) -> dict[int, dict]:
 TEAM_SEASONS_OVERRIDES: dict[str, set[tuple[str, int]]] = {}
 
 
+# Mapping pays anglais (renvoyé par commonplayerinfo) → ISO alpha-3
+# (ce qu'on utilise dans Player.nationality + GridCell flag lookup).
+COUNTRY_TO_ISO: dict[str, str] = {
+    "USA": "USA",
+    "France": "FRA",
+    "Canada": "CAN",
+    "Spain": "ESP",
+    "Slovenia": "SVN",
+    "Serbia": "SRB",
+    "Cameroon": "CMR",
+    "Germany": "DEU",
+    "Greece": "GRC",
+    "Australia": "AUS",
+    "Lithuania": "LTU",
+    "Croatia": "HRV",
+    "Montenegro": "MNE",
+    "Turkey": "TUR",
+    "Finland": "FIN",
+    "Italy": "ITA",
+    "Argentina": "ARG",
+    "Bosnia and Herzegovina": "BIH",
+    "Brazil": "BRA",
+    "United Kingdom": "GBR",
+    "Great Britain": "GBR",
+    "England": "GBR",
+    "Nigeria": "NGA",
+    "Russia": "RUS",
+    "Sweden": "SWE",
+    "Dominican Republic": "DOM",
+    "Switzerland": "CHE",
+    "Bahamas": "BHS",
+    "Latvia": "LVA",
+    "Czech Republic": "CZE",
+    "Czechia": "CZE",
+    "Senegal": "SEN",
+    "South Sudan": "SSD",
+    "Sudan": "SDN",
+    "Ukraine": "UKR",
+    "Israel": "ISR",
+    "Belgium": "BEL",
+    "Netherlands": "NLD",
+    "China": "CHN",
+    "Japan": "JPN",
+    "Mexico": "MEX",
+    "Puerto Rico": "PRI",
+    "Jamaica": "JAM",
+    "Haiti": "HTI",
+    "Egypt": "EGY",
+    "Mali": "MLI",
+    "South Africa": "ZAF",
+    "DR Congo": "COD",
+    "Democratic Republic of the Congo": "COD",
+    "Republic of the Congo": "COG",
+    "Republic of Congo": "COG",
+    "Tunisia": "TUN",
+    "Angola": "AGO",
+    "Georgia": "GEO",
+    "New Zealand": "NZL",
+    "Austria": "AUT",
+    "Poland": "POL",
+    "Portugal": "PRT",
+    "Norway": "NOR",
+    "Denmark": "DNK",
+    "Ireland": "IRL",
+    "Iceland": "ISL",
+    "Estonia": "EST",
+    "North Macedonia": "MKD",
+    "Macedonia": "MKD",
+    "Romania": "ROU",
+    "Slovakia": "SVK",
+    "Bulgaria": "BGR",
+    "Hungary": "HUN",
+    "South Korea": "KOR",
+    "Kazakhstan": "KAZ",
+    "Iran": "IRN",
+    "Turkmenistan": "TKM",
+    "Lebanon": "LBN",
+    "Venezuela": "VEN",
+    "Colombia": "COL",
+    "Uruguay": "URY",
+    "Paraguay": "PRY",
+    "Chile": "CHL",
+    "Peru": "PER",
+    "Cuba": "CUB",
+    "Trinidad and Tobago": "TTO",
+}
+
+
+def _map_award_description(desc: str) -> Optional[str]:
+    """
+    Convertit une description d'award nba_api → notre code interne.
+    Exemples : "NBA Most Valuable Player" → "MVP", "All-NBA" → "All-NBA".
+    Retourne None si l'award n'est pas pertinent pour nos catégories.
+    """
+    if not desc:
+        return None
+    d = desc.lower()
+    if "most valuable player" in d:
+        if "finals" in d:
+            return "Finals MVP"
+        if "all-star" in d:
+            # NBA All-Star Game MVP — informatif mais pas le MVP régulier.
+            return None
+        return "MVP"
+    if "defensive player of the year" in d:
+        return "DPOY"
+    if "rookie of the year" in d:
+        return "ROY"
+    if "sixth man of the year" in d:
+        return "Sixth Man"
+    if "all-defensive" in d:
+        return "All-Defensive"
+    if "all-nba" in d:
+        return "All-NBA"
+    # "NBA All-Star" sans "Game MVP"
+    if "all-star" in d:
+        return "All-Star"
+    return None
+
+
+def _is_championship_award(desc: str) -> bool:
+    """Reconnaît les awards qui prouvent un titre NBA."""
+    if not desc:
+        return False
+    d = desc.lower()
+    return "nba champion" in d or "nba championship" in d
+
+
 def _load_live_snapshots() -> list[dict]:
     """
     Charge tous les snapshots `live_*.json` produits par fetch_live_data.py.
@@ -1298,20 +1427,27 @@ def _merge_live_snapshots(
     snapshots: list[dict],
 ) -> list[Player]:
     """
-    Pour chaque snapshot {season, rosters: {abbr: [{player_id, name, ...}]}},
-    on patche `team_seasons` et `teams` des Player existants. Les rookies
-    pas dans nos CSV sont ajoutés en minimal — ils seront généralement
-    écartés par le filtre top_n vu qu'ils ont 0 stat de carrière agrégée.
+    Patche les Player avec ce que nba_api a remonté :
+    - rosters → team_seasons / teams / seasons
+    - player_info → nationality (ISO alpha-3) + draft_pick + draft_round
+    - player_awards → awards officiels (MVP, All-Star, DPOY…) +
+      éventuellement is_champion si "NBA Champion" est listé.
+
+    Les rookies pas dans nos CSV sont ajoutés en minimal — ils seront
+    généralement écartés par le filtre top_n vu qu'ils ont 0 stat de
+    carrière agrégée.
     """
-    by_id = {p.id: p for p in players}
+    by_id: dict[int, Player] = {p.id: p for p in players}
+
     for snap in snapshots:
         season = snap.get("season", "")
         try:
             year = int(season.split("-")[0])
         except (ValueError, IndexError):
             continue
-        rosters = snap.get("rosters", {})
-        for abbr, plist in rosters.items():
+
+        # 1) Rosters → team_seasons
+        for abbr, plist in (snap.get("rosters") or {}).items():
             if not isinstance(plist, list):
                 continue
             for entry in plist:
@@ -1321,20 +1457,11 @@ def _merge_live_snapshots(
                 if pid in by_id:
                     p = by_id[pid]
                     if (abbr, year) in p.team_seasons:
-                        continue  # déjà connu
-                    by_id[pid] = Player(
-                        id=p.id,
-                        name=p.name,
+                        continue
+                    by_id[pid] = replace(
+                        p,
                         teams=frozenset(p.teams | {abbr}),
-                        nationality=p.nationality,
-                        awards=p.awards,
-                        draft_pick=p.draft_pick,
-                        draft_round=p.draft_round,
-                        career_ppg=p.career_ppg,
-                        career_rpg=p.career_rpg,
-                        career_apg=p.career_apg,
                         seasons=frozenset(p.seasons | {year}),
-                        is_champion=p.is_champion,
                         team_seasons=frozenset(p.team_seasons | {(abbr, year)}),
                     )
                 else:
@@ -1354,6 +1481,70 @@ def _merge_live_snapshots(
                         is_champion=False,
                         team_seasons=frozenset({(abbr, year)}),
                     )
+
+        # 2) player_info → nationality + draft
+        for pid_str, info in (snap.get("player_info") or {}).items():
+            try:
+                pid = int(pid_str)
+            except ValueError:
+                continue
+            if pid not in by_id:
+                continue
+            p = by_id[pid]
+
+            country = (info.get("country") or "").strip()
+            new_nat = COUNTRY_TO_ISO.get(country, p.nationality)
+
+            new_pick = p.draft_pick
+            new_round = p.draft_round
+            try:
+                dnum = info.get("draft_number")
+                if dnum and str(dnum).strip() not in ("", "0", "Undrafted"):
+                    new_pick = int(dnum)
+                drnd = info.get("draft_round")
+                if drnd and str(drnd).strip() not in ("", "0", "Undrafted"):
+                    new_round = int(drnd)
+            except (ValueError, TypeError):
+                pass
+
+            if (
+                new_nat != p.nationality
+                or new_pick != p.draft_pick
+                or new_round != p.draft_round
+            ):
+                by_id[pid] = replace(
+                    p,
+                    nationality=new_nat,
+                    draft_pick=new_pick,
+                    draft_round=new_round,
+                )
+
+        # 3) player_awards → awards + is_champion
+        for pid_str, awards_list in (snap.get("player_awards") or {}).items():
+            try:
+                pid = int(pid_str)
+            except ValueError:
+                continue
+            if pid not in by_id:
+                continue
+            p = by_id[pid]
+            new_awards = set(p.awards)
+            new_is_champion = p.is_champion
+            for award in (awards_list or []):
+                desc = (award or {}).get("description", "")
+                mapped = _map_award_description(desc)
+                if mapped:
+                    new_awards.add(mapped)
+                if _is_championship_award(desc):
+                    new_is_champion = True
+            new_awards_frozen = frozenset(new_awards)
+            if new_awards_frozen != p.awards or new_is_champion != p.is_champion:
+                by_id[pid] = replace(
+                    p,
+                    awards=new_awards_frozen,
+                    is_champion=new_is_champion,
+                )
+
     return list(by_id.values())
 
 
