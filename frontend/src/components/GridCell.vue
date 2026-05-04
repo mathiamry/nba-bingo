@@ -12,12 +12,9 @@ const props = defineProps({
 defineEmits(['click'])
 
 const isEmpty = computed(() => props.state.status === CELL_STATUS.EMPTY)
-// "filled" couvre les placements corrects ET les erronés (vert pendant le jeu).
-// Le serveur multijoueur envoie status='wrong' uniquement quand on doit révéler.
 const isFilled = computed(
   () => props.state.status === 'filled' || props.state.status === 'wrong',
 )
-// "wrong" n'est révélé que si revealErrors est vrai (en fin de partie).
 const showWrong = computed(() => {
   if (!props.revealErrors) return false
   if (props.state.status === 'wrong') return true
@@ -38,52 +35,11 @@ const axisIcon = computed(() => {
   }
 })
 
-// Mapping abbréviation NBA → fichier logo (le zip a quelques quirks).
-const LOGO_FILE_MAP = {
-  phi: 'phl', // Philadelphia 76ers
-  uta: 'uth', // Utah Jazz
-}
-const LOGO_EXT_MAP = {
-  mia: 'gif', // seul fichier en GIF
-}
-
-const teamLogoUrl = computed(() => {
-  if (props.cell.axis !== 'TEAM') return null
-  if (!props.cell.id?.startsWith('team_')) return null
-  const abbr = props.cell.id.slice(5).toLowerCase()
-  if (abbr.length !== 3) return null
-  const file = LOGO_FILE_MAP[abbr] || abbr
-  const ext = LOGO_EXT_MAP[abbr] || 'png'
-  return `/logos/${file}.${ext}`
-})
-
-// Mapping ISO alpha-3 (utilisé dans le dataset) → alpha-2 (flagcdn.com).
-const FLAG_ALPHA2 = {
-  USA: 'us', FRA: 'fr', CAN: 'ca', SRB: 'rs',
-  GRC: 'gr', ESP: 'es', SVN: 'si', DEU: 'de',
-  CMR: 'cm', DOM: 'do', TUR: 'tr', FIN: 'fi',
-  LTU: 'lt', AUS: 'au', MNE: 'me', HRV: 'hr',
-  ARG: 'ar', BIH: 'ba', BRA: 'br', GBR: 'gb',
-  ITA: 'it', NGR: 'ng', RUS: 'ru', SWE: 'se',
-}
-
-const flagUrl = computed(() => {
-  if (props.cell.axis !== 'NATIONALITY') return null
-  if (!props.cell.id?.startsWith('nat_')) return null
-  const code3 = props.cell.id.slice(4).toUpperCase()
-  const code2 = FLAG_ALPHA2[code3]
-  if (!code2) return null
-  return `https://flagcdn.com/w80/${code2}.png`
-})
-
-const imgLoaded = ref(true)
-function onImgError() {
-  imgLoaded.value = false
-}
-
 const cellClasses = computed(() => {
-  if (showWrong.value) return 'bg-bingo-cellLocked text-white border-bingo-cellLocked'
-  if (isFilled.value) return 'bg-bingo-cell text-bingo-textDark border-bingo-cell'
+  if (showWrong.value)
+    return 'bg-bingo-cellLocked text-white border-bingo-cellLocked'
+  if (isFilled.value)
+    return 'bg-bingo-cell text-bingo-textDark border-bingo-cell'
   return 'bg-bingo-cellEmpty text-white border-white/10 hover:border-bingo-cell/60 hover:bg-white/10'
 })
 
@@ -95,69 +51,128 @@ const statusLabel = computed(() => {
 
 const interactable = computed(() => !props.disabled && isEmpty.value)
 
-// Tailwind shrink-on-long-labels — évite les overflow tout en restant lisible.
+const LOGO_FILE_MAP = { phi: 'phl', uta: 'uth' }
+const LOGO_EXT_MAP = { mia: 'gif' }
+
+const teamLogoUrl = computed(() => {
+  if (props.cell.axis !== 'TEAM') return null
+  if (!props.cell.id?.startsWith('team_')) return null
+  const abbr = props.cell.id.slice(5).toLowerCase()
+  if (abbr.length !== 3) return null
+  const file = LOGO_FILE_MAP[abbr] || abbr
+  const ext = LOGO_EXT_MAP[abbr] || 'png'
+  return `/logos/${file}.${ext}`
+})
+
+const FLAG_ALPHA2 = {
+  USA: 'us', FRA: 'fr', CAN: 'ca', SRB: 'rs',
+  GRC: 'gr', ESP: 'es', SVN: 'si', DEU: 'de',
+  CMR: 'cm', DOM: 'do', TUR: 'tr', FIN: 'fi',
+  LTU: 'lt', AUS: 'au', MNE: 'me', HRV: 'hr',
+  ARG: 'ar', BIH: 'ba', BRA: 'br', GBR: 'gb',
+  ITA: 'it', NGA: 'ng', NGR: 'ng', RUS: 'ru', SWE: 'se',
+  AUT: 'at', BEL: 'be', POL: 'pl', PRT: 'pt',
+  NLD: 'nl', SVK: 'sk', ROU: 'ro', BGR: 'bg',
+  HUN: 'hu', UKR: 'ua', LVA: 'lv', EST: 'ee',
+  CHE: 'ch', BHS: 'bs', CZE: 'cz', SEN: 'sn',
+  SSD: 'ss', SDN: 'sd', ISR: 'il', GEO: 'ge',
+  NZL: 'nz', JPN: 'jp', CHN: 'cn', KOR: 'kr',
+  MEX: 'mx', PRI: 'pr', JAM: 'jm', COD: 'cd',
+  COG: 'cg', AGO: 'ao', EGY: 'eg', MLI: 'ml',
+  ZAF: 'za', TUN: 'tn', VEN: 've', COL: 'co',
+  CUB: 'cu', LBN: 'lb', IRN: 'ir', MKD: 'mk',
+}
+
+const flagUrl = computed(() => {
+  if (props.cell.axis !== 'NATIONALITY') return null
+  if (!props.cell.id?.startsWith('nat_')) return null
+  const code3 = props.cell.id.slice(4).toUpperCase()
+  const code2 = FLAG_ALPHA2[code3]
+  if (!code2) return null
+  return `https://flagcdn.com/w160/${code2}.png`
+})
+
+const imgLoaded = ref(true)
+function onImgError() { imgLoaded.value = false }
+
+// Polices adaptatives — si le label est très long on rétrécit légèrement,
+// mais on reste TOUJOURS plus grand que le précédent design.
 const labelClass = computed(() => {
   const n = (props.cell.label || '').length
-  if (n > 22) return 'text-[8px] sm:text-[9px]'
-  if (n > 14) return 'text-[9px] sm:text-[10px]'
-  return 'text-[10px] sm:text-[11px]'
+  if (n > 24) return 'text-[11px] sm:text-xs'
+  if (n > 16) return 'text-xs sm:text-sm'
+  return 'text-sm sm:text-base'
 })
 
 const playerNameClass = computed(() => {
   const n = (props.state.playerName || '').length
-  if (n > 18) return 'text-[7px] sm:text-[8px]'
-  return 'text-[8px] sm:text-[9px]'
+  if (n > 18) return 'text-[10px] sm:text-[11px]'
+  return 'text-[11px] sm:text-xs'
 })
 </script>
 
 <template>
   <button
     :disabled="!interactable"
-    :class="['relative rounded-lg p-1.5 sm:p-2 transition-all flex flex-col items-center justify-center text-center font-semibold border overflow-hidden h-full w-full', cellClasses, interactable ? 'cursor-pointer' : 'cursor-default']"
+    :class="[
+      'relative rounded-2xl px-2 py-3 sm:px-3 sm:py-4 transition-all flex flex-col items-center justify-between gap-1.5 sm:gap-2 text-center font-semibold border overflow-hidden h-full w-full',
+      cellClasses,
+      interactable ? 'cursor-pointer active:scale-95' : 'cursor-default',
+    ]"
     @click="$emit('click', cell.id)"
   >
-    <span v-if="statusLabel" class="absolute top-1 right-1.5 text-[10px] font-bold opacity-80">{{ statusLabel }}</span>
+    <!-- ✓ ou ✕ en haut à droite -->
+    <span
+      v-if="statusLabel"
+      class="absolute top-1.5 right-2 text-xs sm:text-sm font-bold opacity-80"
+    >{{ statusLabel }}</span>
 
-    <img
-      v-if="teamLogoUrl && imgLoaded"
-      :src="teamLogoUrl"
-      alt=""
-      class="w-7 h-7 sm:w-9 sm:h-9 mb-0.5 sm:mb-1 object-contain shrink-0"
-      :class="isEmpty ? 'opacity-90' : ''"
-      @error="onImgError"
-    />
-    <img
-      v-else-if="flagUrl && imgLoaded"
-      :src="flagUrl"
-      alt=""
-      class="w-7 h-5 sm:w-9 sm:h-6 mb-0.5 sm:mb-1 object-contain rounded-sm shadow-sm shrink-0"
-      :class="isEmpty ? 'opacity-90' : ''"
-      @error="onImgError"
-    />
-    <div
-      v-else
-      :class="['text-xl sm:text-2xl mb-0.5 sm:mb-1 shrink-0 leading-none', isEmpty ? 'opacity-70' : '']"
-      aria-hidden="true"
-    >{{ axisIcon }}</div>
-
-    <div
-      :class="[
-        'uppercase tracking-tight leading-[1.1] px-0.5 break-words line-clamp-3 sm:line-clamp-2',
-        labelClass,
-        isEmpty ? 'text-bingo-textMuted' : '',
-      ]"
-    >
-      {{ cell.label }}
+    <!-- Icône / logo / drapeau, taille généreuse -->
+    <div class="flex-1 flex items-center justify-center w-full min-h-[44px]">
+      <img
+        v-if="teamLogoUrl && imgLoaded"
+        :src="teamLogoUrl"
+        alt=""
+        class="w-12 h-12 sm:w-14 sm:h-14 object-contain"
+        :class="isEmpty ? 'opacity-95' : ''"
+        @error="onImgError"
+      />
+      <img
+        v-else-if="flagUrl && imgLoaded"
+        :src="flagUrl"
+        alt=""
+        class="w-12 h-9 sm:w-14 sm:h-10 object-cover rounded-full shadow-md ring-1 ring-white/10"
+        :class="isEmpty ? 'opacity-95' : ''"
+        @error="onImgError"
+      />
+      <div
+        v-else
+        :class="['text-3xl sm:text-4xl leading-none', isEmpty ? 'opacity-80' : '']"
+        aria-hidden="true"
+      >{{ axisIcon }}</div>
     </div>
 
-    <div
-      v-if="state.playerName"
-      :class="[
-        'mt-0.5 sm:mt-1 font-bold uppercase tracking-tight opacity-90 leading-[1.05] break-words w-full line-clamp-2',
-        playerNameClass,
-      ]"
-    >
-      {{ state.playerName }}
+    <!-- Libellé -->
+    <div class="w-full flex flex-col items-center justify-end gap-0.5">
+      <div
+        :class="[
+          'uppercase tracking-tight leading-[1.15] break-words line-clamp-2 font-bold w-full',
+          labelClass,
+          isEmpty ? 'text-bingo-textMuted' : '',
+        ]"
+      >
+        {{ cell.label }}
+      </div>
+
+      <div
+        v-if="state.playerName"
+        :class="[
+          'font-extrabold uppercase tracking-tight opacity-95 leading-[1.05] break-words w-full line-clamp-2 mt-1',
+          playerNameClass,
+        ]"
+      >
+        {{ state.playerName }}
+      </div>
     </div>
   </button>
 </template>
