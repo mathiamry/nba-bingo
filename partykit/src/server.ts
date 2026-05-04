@@ -197,6 +197,11 @@ function viewForRecipient(state: RoomState, recipientId: string) {
 export default class NbaBingoServer implements Party.Server {
   state: RoomState;
   playerTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  // Mapping conn.id ↔ sessionId pour permettre la reconnexion :
+  // l'identité d'un joueur est portée par un sessionId stable côté client
+  // (généré dans localStorage), pas par conn.id qui change à chaque WS.
+  sessionByConn: Map<string, string> = new Map();
+  connsBySession: Map<string, Set<string>> = new Map();
 
   constructor(readonly room: Party.Room) {
     this.state = {
@@ -213,12 +218,40 @@ export default class NbaBingoServer implements Party.Server {
     };
   }
 
+  // Récupère le sessionId associé à une connexion. Si le client n'a pas
+  // encore envoyé son join, retourne "" (spectateur anonyme).
+  private sessionOf(conn: Party.Connection): string {
+    return this.sessionByConn.get(conn.id) ?? "";
+  }
+
   onConnect(conn: Party.Connection) {
+    // Pas de sessionId encore, mais on envoie le state pour que le
+    // client voie au moins l'état du lobby/score s'il y en a un.
     this.sendStateTo(conn);
   }
 
   onClose(conn: Party.Connection) {
-    this.removePlayer(conn.id);
+    const sessionId = this.sessionByConn.get(conn.id);
+    this.sessionByConn.delete(conn.id);
+    if (!sessionId) return;
+    const conns = this.connsBySession.get(sessionId);
+    if (conns) {
+      conns.delete(conn.id);
+      if (conns.size === 0) this.connsBySession.delete(sessionId);
+    }
+    // Toujours connecté ailleurs (autre onglet) ? On ne touche rien.
+    if (this.connsBySession.has(sessionId)) {
+      this.broadcast();
+      return;
+    }
+    // Plus aucune connexion pour ce joueur :
+    // - en LOBBY on supprime (sinon liste polluée par des fantômes)
+    // - en PLAYING/ENDED on garde l'état pour permettre la reconnexion
+    if (this.state.status === "lobby") {
+      this.removePlayer(sessionId);
+    } else {
+      this.broadcast();
+    }
   }
 
   onMessage(raw: string, sender: Party.Connection) {
@@ -230,7 +263,11 @@ export default class NbaBingoServer implements Party.Server {
     }
     switch (msg?.type) {
       case "join":
-        this.handleJoin(sender, sanitizeName(msg.name));
+        this.handleJoin(
+          sender,
+          sanitizeName(msg.name),
+          sanitizeSessionId(msg.sessionId),
+        );
         break;
       case "start":
         this.handleStart(sender);
@@ -249,41 +286,65 @@ export default class NbaBingoServer implements Party.Server {
 
   // ─── Lobby ─────────────────────────────────────────────────────────────
 
-  handleJoin(conn: Party.Connection, name: string) {
-    if (!name) return;
-    const isNew = !this.state.players[conn.id];
-    if (isNew) {
-      this.state.players[conn.id] = {
-        id: conn.id,
-        name,
-        joinedAt: Date.now(),
-      };
-      this.state.placements[conn.id] = [];
-      this.state.playerTurnIndex[conn.id] = 0;
-      this.state.playerTurnEndsAt[conn.id] = 0;
-      this.state.playerDone[conn.id] = false;
-      this.state.playerCompletedAt[conn.id] = 0;
-      if (!this.state.hostId) this.state.hostId = conn.id;
-    } else {
-      this.state.players[conn.id].name = name;
+  handleJoin(conn: Party.Connection, name: string, sessionId: string) {
+    if (!name || !sessionId) return;
+
+    // Associe la connexion au sessionId du joueur.
+    this.sessionByConn.set(conn.id, sessionId);
+    if (!this.connsBySession.has(sessionId)) {
+      this.connsBySession.set(sessionId, new Set());
     }
-    // Si la partie est en cours et qu'il vient d'arriver, on le lance aussi.
-    if (isNew && this.state.status === "playing" && this.state.game) {
-      this.beginPlayerTurn(conn.id);
+    this.connsBySession.get(sessionId)!.add(conn.id);
+
+    const isExistingPlayer = !!this.state.players[sessionId];
+
+    if (isExistingPlayer) {
+      // Reconnexion : on garde tout (placements, score, turn), juste le
+      // nom est éventuellement mis à jour.
+      this.state.players[sessionId].name = name;
+      this.broadcast();
+      return;
+    }
+
+    // Nouveau visiteur :
+    // - en lobby : on l'inscrit comme joueur
+    // - en playing : on l'inscrit aussi mais il démarre tout de suite
+    //   au tour 0 (race async, il peut rattraper)
+    // - en ended : il reste SPECTATEUR (pas de player record), il voit
+    //   le leaderboard final mais ne pollue pas le classement
+    if (this.state.status === "ended") {
+      this.broadcast();
+      return;
+    }
+
+    this.state.players[sessionId] = {
+      id: sessionId,
+      name,
+      joinedAt: Date.now(),
+    };
+    this.state.placements[sessionId] = [];
+    this.state.playerTurnIndex[sessionId] = 0;
+    this.state.playerTurnEndsAt[sessionId] = 0;
+    this.state.playerDone[sessionId] = false;
+    this.state.playerCompletedAt[sessionId] = 0;
+    if (!this.state.hostId) this.state.hostId = sessionId;
+
+    if (this.state.status === "playing" && this.state.game) {
+      this.beginPlayerTurn(sessionId);
     }
     this.broadcast();
   }
 
-  removePlayer(id: string) {
-    if (!this.state.players[id]) return;
-    this.clearPlayerTimer(id);
-    delete this.state.players[id];
-    delete this.state.placements[id];
-    delete this.state.playerTurnIndex[id];
-    delete this.state.playerTurnEndsAt[id];
-    delete this.state.playerDone[id];
-    delete this.state.playerCompletedAt[id];
-    if (this.state.hostId === id) {
+  removePlayer(sessionId: string) {
+    if (!this.state.players[sessionId]) return;
+    this.clearPlayerTimer(sessionId);
+    delete this.state.players[sessionId];
+    delete this.state.placements[sessionId];
+    delete this.state.playerTurnIndex[sessionId];
+    delete this.state.playerTurnEndsAt[sessionId];
+    delete this.state.playerDone[sessionId];
+    delete this.state.playerCompletedAt[sessionId];
+    if (this.state.hostId === sessionId) {
       const remaining = Object.keys(this.state.players);
       this.state.hostId = remaining[0] ?? null;
     }
@@ -299,7 +360,7 @@ export default class NbaBingoServer implements Party.Server {
   // ─── Start / restart ───────────────────────────────────────────────────
 
   handleStart(sender: Party.Connection) {
-    if (sender.id !== this.state.hostId) return;
+    if (this.sessionOf(sender) !== this.state.hostId) return;
     if (this.state.status !== "lobby") return;
     if (Object.keys(this.state.players).length === 0) return;
     if (POOL.games.length === 0) return;
@@ -320,7 +381,7 @@ export default class NbaBingoServer implements Party.Server {
   }
 
   handleRestart(sender: Party.Connection) {
-    if (sender.id !== this.state.hostId) return;
+    if (this.sessionOf(sender) !== this.state.hostId) return;
     if (this.state.status !== "ended") return;
     this.resetToLobby();
     this.broadcast();
@@ -418,8 +479,8 @@ export default class NbaBingoServer implements Party.Server {
 
   handlePlace(sender: Party.Connection, cellId: string) {
     if (this.state.status !== "playing" || !this.state.game) return;
-    const playerId = sender.id;
-    if (!this.state.players[playerId]) return;
+    const playerId = this.sessionOf(sender);
+    if (!playerId || !this.state.players[playerId]) return;
     if (this.state.playerDone[playerId]) return;
 
     const myTurn = this.state.playerTurnIndex[playerId] ?? 0;
@@ -438,8 +499,8 @@ export default class NbaBingoServer implements Party.Server {
 
   handleSkip(sender: Party.Connection) {
     if (this.state.status !== "playing" || !this.state.game) return;
-    const playerId = sender.id;
-    if (!this.state.players[playerId]) return;
+    const playerId = this.sessionOf(sender);
+    if (!playerId || !this.state.players[playerId]) return;
     if (this.state.playerDone[playerId]) return;
 
     const myTurn = this.state.playerTurnIndex[playerId] ?? 0;
@@ -453,7 +514,8 @@ export default class NbaBingoServer implements Party.Server {
   // ─── Wire ──────────────────────────────────────────────────────────────
 
   sendStateTo(conn: Party.Connection) {
-    const view = viewForRecipient(this.state, conn.id);
+    const sessionId = this.sessionOf(conn);
+    const view = viewForRecipient(this.state, sessionId);
     conn.send(JSON.stringify({ type: "state", state: view }));
   }
 
@@ -471,4 +533,11 @@ NbaBingoServer satisfies Party.Worker;
 function sanitizeName(raw: unknown): string {
   if (typeof raw !== "string") return "";
   return raw.trim().slice(0, 24);
+}
+
+function sanitizeSessionId(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  // Doit ressembler à un UUID/token : alphanum + tirets + underscore.
+  const cleaned = raw.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
+  return cleaned;
 }

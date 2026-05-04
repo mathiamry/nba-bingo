@@ -8,6 +8,25 @@ const HOST =
   import.meta.env.VITE_PARTYKIT_HOST ||
   (typeof window !== 'undefined' ? window.location.host : '127.0.0.1:1999')
 const NAME_KEY = 'nbaBingoPlayerName'
+const SESSION_KEY = 'nbaBingoSessionId'
+
+function loadOrCreateSessionId() {
+  try {
+    let id = localStorage.getItem(SESSION_KEY)
+    if (!id) {
+      id =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : 's_' + Math.random().toString(36).slice(2) + Date.now().toString(36)
+      localStorage.setItem(SESSION_KEY, id)
+    }
+    return id
+  } catch {
+    return 's_' + Math.random().toString(36).slice(2)
+  }
+}
+
+const SESSION_ID = loadOrCreateSessionId()
 
 const ConnStatus = {
   IDLE: 'idle',
@@ -95,7 +114,7 @@ export const useMultiplayerStore = defineStore('multiplayer', {
       }
       // Si on est déjà connecté, renvoie un join pour mettre à jour le nom côté serveur
       if (this.isConnected && trimmed) {
-        this._send({ type: 'join', name: trimmed })
+        this._send({ type: 'join', name: trimmed, sessionId: SESSION_ID })
       }
     },
 
@@ -121,7 +140,7 @@ export const useMultiplayerStore = defineStore('multiplayer', {
 
       socket.addEventListener('open', () => {
         this.connStatus = ConnStatus.CONNECTED
-        this._send({ type: 'join', name: this.playerName })
+        this._send({ type: 'join', name: this.playerName, sessionId: SESSION_ID })
         this._startTicker()
       }, { signal })
       socket.addEventListener('message', (event) => {
