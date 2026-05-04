@@ -1552,6 +1552,76 @@ def _merge_live_snapshots(
                     is_champion=new_is_champion,
                 )
 
+        # 4bis) player_career_stats → override career_ppg / career_rpg /
+        # career_apg avec les totaux nba.com (élimine le gap 2023-24 des
+        # CSVs et corrige les averages biaisés des actifs comme CP3, Klay,
+        # Boogie qui ont des saisons manquantes côté CSV).
+        for pid_str, totals in (snap.get("player_career_stats") or {}).items():
+            try:
+                pid = int(pid_str)
+            except ValueError:
+                continue
+            if pid not in by_id:
+                continue
+            p = by_id[pid]
+            try:
+                gp = int(totals.get("gp") or 0)
+                pts = int(totals.get("pts") or 0)
+                reb = int(totals.get("reb") or 0)
+                ast = int(totals.get("ast") or 0)
+            except (ValueError, TypeError):
+                continue
+            if gp <= 0:
+                continue
+            new_ppg = pts / gp
+            new_rpg = reb / gp
+            new_apg = ast / gp
+            if (
+                abs(new_ppg - p.career_ppg) > 0.05
+                or abs(new_rpg - p.career_rpg) > 0.05
+                or abs(new_apg - p.career_apg) > 0.05
+            ):
+                by_id[pid] = replace(
+                    p,
+                    career_ppg=new_ppg,
+                    career_rpg=new_rpg,
+                    career_apg=new_apg,
+                )
+
+        # 4) player_team_seasons → patch teams + team_seasons + seasons
+        # (de enrich_career_teams.py — reconstruit l'historique d'équipes
+        # via playercareerstats, plus précis que les CSV)
+        for pid_str, ts_list in (snap.get("player_team_seasons") or {}).items():
+            try:
+                pid = int(pid_str)
+            except ValueError:
+                continue
+            if pid not in by_id:
+                continue
+            p = by_id[pid]
+            new_team_seasons = set(p.team_seasons)
+            new_teams = set(p.teams)
+            new_seasons = set(p.seasons)
+            for entry in (ts_list or []):
+                if not isinstance(entry, list) or len(entry) != 2:
+                    continue
+                abbr, year = entry[0], entry[1]
+                if not abbr or not isinstance(year, int):
+                    continue
+                new_team_seasons.add((abbr, year))
+                new_teams.add(abbr)
+                new_seasons.add(year)
+            if (
+                len(new_team_seasons) != len(p.team_seasons)
+                or len(new_teams) != len(p.teams)
+            ):
+                by_id[pid] = replace(
+                    p,
+                    teams=frozenset(new_teams),
+                    team_seasons=frozenset(new_team_seasons),
+                    seasons=frozenset(new_seasons),
+                )
+
     return list(by_id.values())
 
 
