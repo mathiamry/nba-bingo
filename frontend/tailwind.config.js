@@ -22,7 +22,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Inter"', 'system-ui', 'sans-serif'],
+        display: ['"Montserrat"', 'system-ui', 'sans-serif'],
+        sans: ['"Montserrat"', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         cellIn: {
