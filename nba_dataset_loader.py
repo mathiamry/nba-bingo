@@ -1296,7 +1296,7 @@ def load_real_dataset(
     csv_dir: str,
     hist_csv: Optional[str] = None,
     min_games: int = 15,
-    top_n: Optional[int] = 500,
+    top_n: Optional[int] = 250,
 ) -> tuple[list[Category], list[Player]]:
     """
     Charge et fusionne les deux sources de données NBA.
@@ -1572,8 +1572,11 @@ def _build_categories(
         ))
 
     # ── NATIONALITY ───────────────────────────────────────────────────────────
+    # USA exclu — trop facile vu que ~70% des joueurs NBA sont US.
     nats_present = {p.nationality for p in players if p.nationality}
     for nat in sorted(nats_present):
+        if nat == "USA":
+            continue
         if nat not in NAT_LABELS:
             continue
         cats.append(Category(
@@ -1586,17 +1589,15 @@ def _build_categories(
 
     # ── AWARD ─────────────────────────────────────────────────────────────────
     award_defs = [
-        ("award_mvp",        "MVP",              2, "MVP"),
-        ("award_finals_mvp", "Finals MVP",        3, "Finals MVP"),
-        ("award_dpoy",       "DPOY",              3, "DPOY"),
-        ("award_roy",        "Rookie of the Year", 3, "ROY"),
-        ("award_6moy",       "Sixth Man",         4, "Sixth Man"),
-        ("award_all_star",   "All-Star",          1, "All-Star"),
-        ("award_all_nba",    "All-NBA",           2, "All-NBA"),
-        ("award_olympic_gold_2024",   "Champion olympique 2024",          3,
-         "Olympic Gold 2024"),
-        ("award_olympic_silver_fra",  "Médaille argent Paris 2024 (France)", 4,
-         "Olympic Silver 2024"),
+        ("award_mvp",        "MVP",          2, "MVP"),
+        ("award_finals_mvp", "Finals MVP",   3, "Finals MVP"),
+        ("award_dpoy",       "DPOY",         3, "DPOY"),
+        ("award_roy",        "ROY",          3, "ROY"),
+        ("award_6moy",       "Sixth Man",    4, "Sixth Man"),
+        ("award_all_star",   "All-Star",     1, "All-Star"),
+        ("award_all_nba",    "All-NBA",      2, "All-NBA"),
+        ("award_olympic_gold_2024",   "Or JO 2024",     3, "Olympic Gold 2024"),
+        ("award_olympic_silver_fra",  "Argent JO 2024", 4, "Olympic Silver 2024"),
     ]
     for cid, label, diff, key in award_defs:
         cats.append(Category(
@@ -1606,25 +1607,25 @@ def _build_categories(
 
     # ── DRAFT ─────────────────────────────────────────────────────────────────
     cats.extend([
-        Category("draft_pick_1", "1er choix de draft", Axis.DRAFT, 3,
+        Category("draft_pick_1", "Draft #1", Axis.DRAFT, 3,
                  lambda p: p.draft_pick == 1),
-        Category("draft_top_3", "Top 3 de draft", Axis.DRAFT, 2,
+        Category("draft_top_3", "Top 3 draft", Axis.DRAFT, 2,
                  lambda p: p.draft_pick is not None and p.draft_pick <= 3),
-        Category("draft_round_2", "Choix du 2e tour", Axis.DRAFT, 4,
+        Category("draft_round_2", "2e tour de draft", Axis.DRAFT, 4,
                  lambda p: p.draft_round == 2),
     ])
 
     # ── STAT (moyennes de carrière) ────────────────────────────────────────────
     cats.extend([
-        Category("stat_20_ppg", "20+ PPG (carrière)", Axis.STAT, 2,
+        Category("stat_20_ppg", "20+ PPG", Axis.STAT, 2,
                  lambda p: p.career_ppg >= 20.0),
-        Category("stat_25_ppg", "25+ PPG (carrière)", Axis.STAT, 3,
+        Category("stat_25_ppg", "25+ PPG", Axis.STAT, 3,
                  lambda p: p.career_ppg >= 25.0),
-        Category("stat_30_ppg", "30+ PPG (carrière)", Axis.STAT, 5,
+        Category("stat_30_ppg", "30+ PPG", Axis.STAT, 5,
                  lambda p: p.career_ppg >= 30.0),
-        Category("stat_10_rpg", "10+ RPG (carrière)", Axis.STAT, 4,
+        Category("stat_10_rpg", "10+ RPG", Axis.STAT, 4,
                  lambda p: p.career_rpg >= 10.0),
-        Category("stat_8_apg",  "8+ APG (carrière)",  Axis.STAT, 4,
+        Category("stat_8_apg",  "8+ APG",  Axis.STAT, 4,
                  lambda p: p.career_apg >= 8.0),
     ])
 
@@ -1632,23 +1633,23 @@ def _build_categories(
     cats.extend([
         Category("career_champion", "Champion NBA", Axis.CAREER, 2,
                  lambda p: p.is_champion),
-        Category("career_one_team", "Une seule franchise (carrière)",
+        Category("career_one_team", "1 seule franchise",
                  Axis.CAREER, 3,
                  lambda p: len(p.teams) == 1),
-        Category("career_4plus_teams", "Joué pour 4+ franchises",
+        Category("career_4plus_teams", "4+ franchises",
                  Axis.CAREER, 2,
                  lambda p: len(p.teams) >= 4),
     ])
 
     # ── ERA ───────────────────────────────────────────────────────────────────
     cats.extend([
-        Category("era_1990s", "Actif dans les années 1990", Axis.ERA, 3,
+        Category("era_1990s", "Années 90", Axis.ERA, 3,
                  lambda p: any(s < 2000 for s in p.seasons)),
-        Category("era_2000s", "Actif dans les années 2000", Axis.ERA, 2,
+        Category("era_2000s", "Années 2000", Axis.ERA, 2,
                  lambda p: any(2000 <= s < 2010 for s in p.seasons)),
-        Category("era_2010s", "Actif dans les années 2010", Axis.ERA, 1,
+        Category("era_2010s", "Années 2010", Axis.ERA, 1,
                  lambda p: any(2010 <= s < 2020 for s in p.seasons)),
-        Category("era_2020s", "Actif dans les années 2020", Axis.ERA, 1,
+        Category("era_2020s", "Années 2020", Axis.ERA, 1,
                  lambda p: any(s >= 2020 for s in p.seasons)),
     ])
 
@@ -1662,7 +1663,7 @@ def _build_categories(
             continue
         cats.append(Category(
             id=f"teammate_{target.id}",
-            label=f"A joué avec {star_name}",
+            label=f"Joué avec {star_name}",
             axis=Axis.TEAMMATE,
             difficulty=3,
             predicate=lambda p, t=target.team_seasons, tid=target.id:
@@ -1672,59 +1673,49 @@ def _build_categories(
     # ── COMBOS (catégories composées) ─────────────────────────────────────────
     # ~3-8 joueurs par catégorie — difficulté 4-5.
     cats.extend([
-        # Jordan, Robinson, Garnett, Giannis, Olajuwon
-        Category("combo_mvp_dpoy", "MVP et DPOY", Axis.AWARD, 5,
+        Category("combo_mvp_dpoy", "MVP + DPOY", Axis.AWARD, 5,
                  lambda p: "MVP" in p.awards and "DPOY" in p.awards),
 
-        # Shaq, Tim Duncan, LeBron, Robinson, Olajuwon
         Category("combo_pick1_mvp_champ",
-                 "Draft #1, MVP et Champion NBA", Axis.AWARD, 5,
+                 "Draft #1 + MVP + champion", Axis.AWARD, 5,
                  lambda p: (p.draft_pick == 1
                             and "MVP" in p.awards
                             and p.is_champion)),
 
-        # Jordan, Olajuwon, Giannis, Kawhi
         Category("combo_finals_mvp_dpoy",
-                 "Finals MVP et DPOY", Axis.AWARD, 5,
+                 "Finals MVP + DPOY", Axis.AWARD, 5,
                  lambda p: ("Finals MVP" in p.awards
                             and "DPOY" in p.awards)),
 
-        # Jordan, Magic (hors dataset), LeBron, Shaq, Duncan, Jokić, Giannis, Curry
         Category("combo_mvp_finals_mvp_champ",
-                 "MVP, Finals MVP et Champion", Axis.AWARD, 4,
+                 "MVP + Finals MVP + champion", Axis.AWARD, 4,
                  lambda p: ("MVP" in p.awards
                             and "Finals MVP" in p.awards
                             and p.is_champion)),
 
-        # LeBron, Durant, Andrew Wiggins, Shaq, Pau Gasol, Vince Carter...
         Category("combo_roy_champ",
-                 "ROY et Champion NBA", Axis.AWARD, 4,
+                 "ROY + champion", Axis.AWARD, 4,
                  lambda p: "ROY" in p.awards and p.is_champion),
 
-        # Jokić, Draymond, Ginobili, Marc Gasol, Middleton, Patty Mills…
         Category("combo_r2_champ",
-                 "Choix 2e tour + Champion NBA", Axis.DRAFT, 3,
+                 "2e tour + champion", Axis.DRAFT, 3,
                  lambda p: p.draft_round == 2 and p.is_champion),
 
-        # LeBron, Curry, Durant, Tatum, Jrue, Davis, Caruso, White…
         Category("combo_olympic24_champ",
-                 "Champion olympique 2024 et Champion NBA", Axis.AWARD, 4,
+                 "Or JO 2024 + champion", Axis.AWARD, 4,
                  lambda p: ("Olympic Gold 2024" in p.awards
                             and p.is_champion)),
 
-        # Russell Westbrook, Luka, Trae Young, Haliburton…
         Category("combo_ppg20_apg8",
-                 "20+ PPG et 8+ PAS (carrière)", Axis.STAT, 4,
+                 "20+ PPG et 8+ AST", Axis.STAT, 4,
                  lambda p: p.career_ppg >= 20.0 and p.career_apg >= 8.0),
 
-        # Jokić, Sabonis…
         Category("combo_rpg10_apg5",
-                 "10+ REB et 5+ PAS (carrière)", Axis.STAT, 5,
+                 "10+ REB et 5+ AST", Axis.STAT, 5,
                  lambda p: p.career_rpg >= 10.0 and p.career_apg >= 5.0),
 
-        # Jokić, Draymond, Ginobili, Marc Gasol, Isaiah Thomas, Brunson…
         Category("combo_r2_allstar",
-                 "Choix 2e tour + All-Star", Axis.DRAFT, 3,
+                 "2e tour + All-Star", Axis.DRAFT, 3,
                  lambda p: p.draft_round == 2 and "All-Star" in p.awards),
     ])
 

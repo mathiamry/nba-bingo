@@ -90,10 +90,14 @@ onBeforeUnmount(() => {
   <div class="min-h-screen flex flex-col items-center pb-10">
     <!-- Header (toujours visible, clic = retour home) -->
     <header
-      class="w-full bg-bingo-header py-5 px-4 text-center cursor-pointer select-none"
+      class="w-full py-5 px-4 text-center cursor-pointer select-none"
+      style="background: linear-gradient(135deg, #3b3aff 0%, #5857ff 55%, #3533d6 100%);"
       @click="navigate('/')"
     >
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-[0.2em] uppercase">NBA BINGO</h1>
+      <h1
+        class="text-2xl sm:text-3xl font-extrabold tracking-[0.25em] uppercase"
+        style="text-shadow: 0 2px 8px rgba(0,0,0,0.35);"
+      >NBA BINGO</h1>
     </header>
 
     <!-- HOME -->
@@ -113,12 +117,17 @@ onBeforeUnmount(() => {
 
     <!-- SOLO -->
     <template v-else-if="route.name === 'solo'">
-      <div class="w-full bg-bingo-banner/80 py-2 text-center text-xs sm:text-sm">
+      <div
+        class="w-full py-2 text-center text-xs sm:text-sm font-medium tracking-wide border-b border-white/10"
+        style="background: linear-gradient(to right, #3b3aff, #3533d6);"
+      >
         Mode solo — {{ rules.secondsPerTurn }}s par tour, grille parfaite : {{ rules.totalPerfectScore }} pts.
       </div>
 
-      <main class="w-full max-w-md px-3 mt-4 flex flex-col gap-4">
+      <main class="w-full max-w-md mt-2 flex flex-col gap-2">
+        <!-- StatusBanner edge-to-edge en phase terminée -->
         <StatusBanner
+          v-if="isEnded"
           :ended="isEnded"
           :won="won"
           :placed-count="placedCount"
@@ -138,7 +147,12 @@ onBeforeUnmount(() => {
 
         <div
           v-if="cells.length === 16"
-          class="grid grid-cols-4 grid-rows-4 aspect-square rounded-2xl overflow-hidden bg-bingo-cellEmpty"
+          :class="[
+            'grid grid-cols-4 grid-rows-4 aspect-square mx-1',
+            isEnded
+              ? 'gap-2 sm:gap-3'
+              : 'rounded-2xl overflow-hidden bg-bingo-cellEmpty',
+          ]"
         >
           <GridCell
             v-for="(cell, i) in cells"
@@ -152,7 +166,7 @@ onBeforeUnmount(() => {
           />
         </div>
 
-        <div v-if="error" class="bg-bingo-cellLocked/20 border border-bingo-cellLocked rounded-xl p-4 text-sm">
+        <div v-if="error" class="mx-3 bg-bingo-cellLocked/20 border border-bingo-cellLocked rounded-xl p-4 text-sm">
           Impossible de charger la partie : {{ error }}.<br />
           Lance <code class="bg-black/40 px-1 rounded">python3 nba_bingo_grid.py</code> pour générer
           <code class="bg-black/40 px-1 rounded">frontend/public/game.json</code>.

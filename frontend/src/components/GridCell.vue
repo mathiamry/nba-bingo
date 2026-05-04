@@ -22,14 +22,36 @@ const showWrong = computed(() => {
   return isFilled.value && props.state.wasCorrect === false
 })
 
-// Effet plateau de dames : alternance de teintes selon (row + col) % 2.
-// Index 0 = (0,0) = clair, 1 = (0,1) = sombre, ...
+// Checkerboard: alternation by (row + col) % 2
 const isCheckerLight = computed(
   () => (Math.floor(props.index / 4) + (props.index % 4)) % 2 === 0,
 )
 
-const axisIcon = computed(() => {
-  switch (props.cell.axis) {
+// ── Specific emoji per cell id, falls back to axis default ───────────────
+const AWARD_EMOJI = {
+  award_mvp: '👑',
+  award_finals_mvp: '🏆',
+  award_dpoy: '🛡️',
+  award_roy: '🌟',
+  award_6moy: '💺',
+  award_all_star: '⭐',
+  award_all_nba: '✨',
+  award_olympic_gold_2024: '🥇',
+  award_olympic_silver_fra: '🥈',
+}
+
+function emojiFor(id, axis) {
+  if (id && AWARD_EMOJI[id]) return AWARD_EMOJI[id]
+  // STAT variants
+  if (id?.includes('ppg')) return '🎯'
+  if (id?.includes('rpg')) return '💪'
+  if (id?.includes('apg')) return '🎲'
+  // ERA
+  if (id === 'era_2020s') return '🆕'
+  // COMBO
+  if (id?.startsWith('combo_')) return '💎'
+  // Axis defaults
+  switch (axis) {
     case 'TEAM': return '🏀'
     case 'NATIONALITY': return '🌍'
     case 'AWARD': return '🏆'
@@ -40,20 +62,28 @@ const axisIcon = computed(() => {
     case 'TEAMMATE': return '🤝'
     default: return '•'
   }
-})
+}
+
+const axisIcon = computed(() => emojiFor(props.cell.id, props.cell.axis))
 
 const cellClasses = computed(() => {
-  if (showWrong.value) return 'bg-bingo-cellLocked text-white'
-  if (isFilled.value) return 'bg-bingo-cell text-bingo-textDark'
-  // Empty : alternance checkerboard
+  if (showWrong.value)
+    return 'bg-bingo-cellLocked text-white'
+  if (isFilled.value)
+    return 'bg-bingo-cell text-bingo-textDark'
+  // Empty: checkerboard with inner top-highlight shimmer via box-shadow
   return isCheckerLight.value
-    ? 'bg-bingo-cellEmptyLight text-white hover:bg-white/10'
-    : 'bg-bingo-cellEmpty text-white hover:bg-white/[0.07]'
+    ? 'bg-bingo-cellEmptyLight text-white hover:brightness-125 active:brightness-150'
+    : 'bg-bingo-cellEmpty text-white hover:brightness-125 active:brightness-150'
 })
 
+// Animation class applied only when transitioning to filled/wrong state
+const animateIn = computed(() => isFilled.value || showWrong.value)
+
 const statusLabel = computed(() => {
+  // On affiche uniquement le ✕ rouge pour les erreurs révélées en fin de
+  // partie. Pour les cases correctes, le fond lime suffit comme indicateur.
   if (showWrong.value) return '✕'
-  if (isFilled.value) return '✓'
   return ''
 })
 
@@ -103,14 +133,25 @@ const flagUrl = computed(() => {
 const imgLoaded = ref(true)
 function onImgError() { imgLoaded.value = false }
 
-// Polices adaptatives — plus agressif sur les très longs libellés pour
-// éviter l'overflow tout en gardant lisible (>=11px partout).
+// Adaptive label font size — on shrink plus tôt pour que les noms de
+// pays/équipes 8-9 caractères ("CAMEROUN", "WARRIORS", "LITUANIE",
+// "MAVERICKS") tiennent sur UNE seule ligne au sm: breakpoint, où le
+// précédent text-base (16px) débordait sur la largeur de cellule.
 const labelClass = computed(() => {
   const n = (props.cell.label || '').length
   if (n > 26) return 'text-[10px] sm:text-[11px]'
   if (n > 20) return 'text-[11px] sm:text-xs'
   if (n > 14) return 'text-xs sm:text-sm'
+  if (n > 7)  return 'text-xs sm:text-sm'
   return 'text-sm sm:text-base'
+})
+
+// Label tracking: short labels breathe more
+const labelTracking = computed(() => {
+  const n = (props.cell.label || '').length
+  if (n <= 8) return 'tracking-widest'
+  if (n <= 14) return 'tracking-wide'
+  return 'tracking-tight'
 })
 
 const playerNameClass = computed(() => {
@@ -126,8 +167,12 @@ const playerNameClass = computed(() => {
     :disabled="!interactable"
     :class="[
       'relative px-1.5 py-2 sm:px-2 sm:py-3 transition-colors flex flex-col items-center justify-between gap-1 sm:gap-1.5 text-center font-semibold overflow-hidden h-full w-full',
+      revealErrors ? 'rounded-xl' : 'rounded-none',
       cellClasses,
-      interactable ? 'cursor-pointer active:brightness-110' : 'cursor-default',
+      animateIn ? 'animate-cell-in' : '',
+      interactable ? 'cursor-pointer' : 'cursor-default',
+      // Inner top-edge highlight on empty cells for glassy feel
+      isEmpty ? 'shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]' : '',
     ]"
     @click="$emit('click', cell.id)"
   >
@@ -136,39 +181,41 @@ const playerNameClass = computed(() => {
       class="absolute top-1 right-1.5 text-[10px] sm:text-xs font-bold opacity-80"
     >{{ statusLabel }}</span>
 
-    <!-- Icône / logo / drapeau -->
-    <div class="flex-1 flex items-center justify-center w-full min-h-[40px] sm:min-h-[48px]">
+    <!-- Icon / logo / flag -->
+    <div class="flex-1 flex items-center justify-center w-full min-h-[40px] sm:min-h-[50px]">
       <img
         v-if="teamLogoUrl && imgLoaded"
         :src="teamLogoUrl"
         alt=""
-        class="w-10 h-10 sm:w-12 sm:h-12 object-contain"
-        :class="isEmpty ? 'opacity-95' : ''"
+        class="w-10 h-10 sm:w-13 sm:h-13 object-contain drop-shadow-sm"
+        :class="isEmpty ? 'opacity-90' : ''"
         @error="onImgError"
       />
       <img
         v-else-if="flagUrl && imgLoaded"
         :src="flagUrl"
         alt=""
-        class="w-10 h-7 sm:w-12 sm:h-9 object-cover rounded-full ring-1 ring-white/15"
-        :class="isEmpty ? 'opacity-95' : ''"
+        class="w-10 h-7 sm:w-12 sm:h-9 object-cover rounded-sm ring-1 ring-white/20 shadow-sm"
+        :class="isEmpty ? 'opacity-90' : ''"
         @error="onImgError"
       />
       <div
         v-else
-        :class="['text-2xl sm:text-3xl leading-none', isEmpty ? 'opacity-80' : '']"
+        :class="['text-2xl sm:text-[1.75rem] leading-none', isEmpty ? 'opacity-75' : '']"
         aria-hidden="true"
       >{{ axisIcon }}</div>
     </div>
 
-    <!-- Libellé + joueur posé -->
+    <!-- Label + placed player name -->
     <div class="w-full flex flex-col items-center justify-end gap-0.5">
       <div
         :class="[
-          'uppercase tracking-tight leading-[1.1] break-words line-clamp-3 font-bold w-full',
+          'uppercase leading-[1.15] break-words line-clamp-3 font-bold w-full',
           labelClass,
+          labelTracking,
           isEmpty ? 'text-bingo-textMuted' : '',
         ]"
+        :style="isEmpty ? 'text-shadow: 0 1px 3px rgba(0,0,0,0.45)' : ''"
       >
         {{ cell.label }}
       </div>

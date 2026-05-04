@@ -111,7 +111,7 @@ const reconnecting = computed(
 </script>
 
 <template>
-  <main class="w-full max-w-md px-3 mt-4 flex flex-col gap-4">
+  <main class="w-full max-w-md px-3 mt-3 flex flex-col gap-3">
     <!-- Bandeau room -->
     <div class="bg-bingo-banner/40 border border-white/10 rounded-xl px-3 py-2 flex items-center gap-2">
       <button
@@ -208,16 +208,10 @@ const reconnecting = computed(
 
     <!-- PLAYING -->
     <template v-if="serverPhase === 'playing'">
-      <StatusBanner
-        :ended="false"
-        :won="false"
-        :placed-count="placedCount"
-        :total="rules.gridSize"
-      />
-
       <!-- Joueur courant + timer perso (caché si on a fini) -->
       <PlayerCard
         v-if="!isDone"
+        class="-mx-3"
         :player="currentPlayer"
         :turn-index="turnIndex"
         :total-turns="sequenceLength"
@@ -239,7 +233,7 @@ const reconnecting = computed(
         </div>
       </div>
 
-      <div v-if="cells.length === 16" class="grid grid-cols-4 grid-rows-4 aspect-square rounded-2xl overflow-hidden bg-bingo-cellEmpty">
+      <div v-if="cells.length === 16" class="-mx-3 grid grid-cols-4 grid-rows-4 aspect-square rounded-2xl overflow-hidden bg-bingo-cellEmpty">
         <GridCell
           v-for="(cell, i) in cells"
           :key="cell.id"
@@ -277,7 +271,7 @@ const reconnecting = computed(
         :total="rules.gridSize"
       />
 
-      <div v-if="cells.length === 16" class="grid grid-cols-4 grid-rows-4 aspect-square rounded-2xl overflow-hidden bg-bingo-cellEmpty">
+      <div v-if="cells.length === 16" class="-mx-3 grid grid-cols-4 grid-rows-4 aspect-square gap-2 sm:gap-3 px-2">
         <GridCell
           v-for="(cell, i) in cells"
           :key="cell.id"
