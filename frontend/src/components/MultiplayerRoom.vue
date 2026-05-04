@@ -239,12 +239,13 @@ const reconnecting = computed(
         </div>
       </div>
 
-      <div v-if="cells.length === 16" class="grid grid-cols-4 grid-rows-4 gap-2 sm:gap-3 [grid-auto-rows:minmax(0,1fr)] aspect-[4/5]">
+      <div v-if="cells.length === 16" class="grid grid-cols-4 grid-rows-4 aspect-square rounded-2xl overflow-hidden bg-bingo-cellEmpty">
         <GridCell
-          v-for="cell in cells"
+          v-for="(cell, i) in cells"
           :key="cell.id"
           :cell="cell"
           :state="cellStates[cell.id] || { status: 'empty', playerName: null, wasCorrect: null }"
+          :index="i"
           :reveal-errors="false"
           :disabled="cellGridDisabled"
           @click="(id) => mp.place(id)"
@@ -276,12 +277,13 @@ const reconnecting = computed(
         :total="rules.gridSize"
       />
 
-      <div v-if="cells.length === 16" class="grid grid-cols-4 grid-rows-4 gap-2 sm:gap-3 [grid-auto-rows:minmax(0,1fr)] aspect-[4/5]">
+      <div v-if="cells.length === 16" class="grid grid-cols-4 grid-rows-4 aspect-square rounded-2xl overflow-hidden bg-bingo-cellEmpty">
         <GridCell
-          v-for="cell in cells"
+          v-for="(cell, i) in cells"
           :key="cell.id"
           :cell="cell"
           :state="cellStates[cell.id] || { status: 'empty', playerName: null, wasCorrect: null }"
+          :index="i"
           :reveal-errors="true"
           :disabled="true"
           @click="() => {}"

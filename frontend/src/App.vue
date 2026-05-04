@@ -138,13 +138,14 @@ onBeforeUnmount(() => {
 
         <div
           v-if="cells.length === 16"
-          class="grid grid-cols-4 grid-rows-4 gap-2 sm:gap-3 [grid-auto-rows:minmax(0,1fr)] aspect-[4/5]"
+          class="grid grid-cols-4 grid-rows-4 aspect-square rounded-2xl overflow-hidden bg-bingo-cellEmpty"
         >
           <GridCell
-            v-for="cell in cells"
+            v-for="(cell, i) in cells"
             :key="cell.id"
             :cell="cell"
             :state="cellStates[cell.id]"
+            :index="i"
             :reveal-errors="isEnded"
             :disabled="!isPlaying || !currentPlayer"
             @click="(id) => game.placePlayer(id)"

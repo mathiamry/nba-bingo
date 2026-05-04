@@ -5,6 +5,7 @@ import { CELL_STATUS } from '../stores/game.js'
 const props = defineProps({
   cell: { type: Object, required: true },
   state: { type: Object, required: true },
+  index: { type: Number, default: 0 },
   disabled: { type: Boolean, default: false },
   revealErrors: { type: Boolean, default: false },
 })
@@ -21,6 +22,12 @@ const showWrong = computed(() => {
   return isFilled.value && props.state.wasCorrect === false
 })
 
+// Effet plateau de dames : alternance de teintes selon (row + col) % 2.
+// Index 0 = (0,0) = clair, 1 = (0,1) = sombre, ...
+const isCheckerLight = computed(
+  () => (Math.floor(props.index / 4) + (props.index % 4)) % 2 === 0,
+)
+
 const axisIcon = computed(() => {
   switch (props.cell.axis) {
     case 'TEAM': return '🏀'
@@ -36,11 +43,12 @@ const axisIcon = computed(() => {
 })
 
 const cellClasses = computed(() => {
-  if (showWrong.value)
-    return 'bg-bingo-cellLocked text-white border-bingo-cellLocked'
-  if (isFilled.value)
-    return 'bg-bingo-cell text-bingo-textDark border-bingo-cell'
-  return 'bg-bingo-cellEmpty text-white border-white/10 hover:border-bingo-cell/60 hover:bg-white/10'
+  if (showWrong.value) return 'bg-bingo-cellLocked text-white'
+  if (isFilled.value) return 'bg-bingo-cell text-bingo-textDark'
+  // Empty : alternance checkerboard
+  return isCheckerLight.value
+    ? 'bg-bingo-cellEmptyLight text-white hover:bg-white/10'
+    : 'bg-bingo-cellEmpty text-white hover:bg-white/[0.07]'
 })
 
 const statusLabel = computed(() => {
@@ -95,17 +103,19 @@ const flagUrl = computed(() => {
 const imgLoaded = ref(true)
 function onImgError() { imgLoaded.value = false }
 
-// Polices adaptatives — si le label est très long on rétrécit légèrement,
-// mais on reste TOUJOURS plus grand que le précédent design.
+// Polices adaptatives — plus agressif sur les très longs libellés pour
+// éviter l'overflow tout en gardant lisible (>=11px partout).
 const labelClass = computed(() => {
   const n = (props.cell.label || '').length
-  if (n > 24) return 'text-[11px] sm:text-xs'
-  if (n > 16) return 'text-xs sm:text-sm'
+  if (n > 26) return 'text-[10px] sm:text-[11px]'
+  if (n > 20) return 'text-[11px] sm:text-xs'
+  if (n > 14) return 'text-xs sm:text-sm'
   return 'text-sm sm:text-base'
 })
 
 const playerNameClass = computed(() => {
   const n = (props.state.playerName || '').length
+  if (n > 22) return 'text-[9px] sm:text-[10px]'
   if (n > 18) return 'text-[10px] sm:text-[11px]'
   return 'text-[11px] sm:text-xs'
 })
@@ -115,25 +125,24 @@ const playerNameClass = computed(() => {
   <button
     :disabled="!interactable"
     :class="[
-      'relative rounded-2xl px-2 py-3 sm:px-3 sm:py-4 transition-all flex flex-col items-center justify-between gap-1.5 sm:gap-2 text-center font-semibold border overflow-hidden h-full w-full',
+      'relative px-1.5 py-2 sm:px-2 sm:py-3 transition-colors flex flex-col items-center justify-between gap-1 sm:gap-1.5 text-center font-semibold overflow-hidden h-full w-full',
       cellClasses,
-      interactable ? 'cursor-pointer active:scale-95' : 'cursor-default',
+      interactable ? 'cursor-pointer active:brightness-110' : 'cursor-default',
     ]"
     @click="$emit('click', cell.id)"
   >
-    <!-- ✓ ou ✕ en haut à droite -->
     <span
       v-if="statusLabel"
-      class="absolute top-1.5 right-2 text-xs sm:text-sm font-bold opacity-80"
+      class="absolute top-1 right-1.5 text-[10px] sm:text-xs font-bold opacity-80"
     >{{ statusLabel }}</span>
 
-    <!-- Icône / logo / drapeau, taille généreuse -->
-    <div class="flex-1 flex items-center justify-center w-full min-h-[44px]">
+    <!-- Icône / logo / drapeau -->
+    <div class="flex-1 flex items-center justify-center w-full min-h-[40px] sm:min-h-[48px]">
       <img
         v-if="teamLogoUrl && imgLoaded"
         :src="teamLogoUrl"
         alt=""
-        class="w-12 h-12 sm:w-14 sm:h-14 object-contain"
+        class="w-10 h-10 sm:w-12 sm:h-12 object-contain"
         :class="isEmpty ? 'opacity-95' : ''"
         @error="onImgError"
       />
@@ -141,22 +150,22 @@ const playerNameClass = computed(() => {
         v-else-if="flagUrl && imgLoaded"
         :src="flagUrl"
         alt=""
-        class="w-12 h-9 sm:w-14 sm:h-10 object-cover rounded-full shadow-md ring-1 ring-white/10"
+        class="w-10 h-7 sm:w-12 sm:h-9 object-cover rounded-full ring-1 ring-white/15"
         :class="isEmpty ? 'opacity-95' : ''"
         @error="onImgError"
       />
       <div
         v-else
-        :class="['text-3xl sm:text-4xl leading-none', isEmpty ? 'opacity-80' : '']"
+        :class="['text-2xl sm:text-3xl leading-none', isEmpty ? 'opacity-80' : '']"
         aria-hidden="true"
       >{{ axisIcon }}</div>
     </div>
 
-    <!-- Libellé -->
+    <!-- Libellé + joueur posé -->
     <div class="w-full flex flex-col items-center justify-end gap-0.5">
       <div
         :class="[
-          'uppercase tracking-tight leading-[1.15] break-words line-clamp-2 font-bold w-full',
+          'uppercase tracking-tight leading-[1.1] break-words line-clamp-3 font-bold w-full',
           labelClass,
           isEmpty ? 'text-bingo-textMuted' : '',
         ]"
@@ -167,7 +176,7 @@ const playerNameClass = computed(() => {
       <div
         v-if="state.playerName"
         :class="[
-          'font-extrabold uppercase tracking-tight opacity-95 leading-[1.05] break-words w-full line-clamp-2 mt-1',
+          'font-extrabold uppercase tracking-tight opacity-95 leading-[1.05] break-words w-full line-clamp-2 mt-0.5',
           playerNameClass,
         ]"
       >

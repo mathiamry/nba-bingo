@@ -6,15 +6,16 @@ export default {
       colors: {
         // Palette inspirée du screenshot Football Bingo
         bingo: {
-          bg: '#0d0d12',           // fond très sombre
-          header: '#3b3aff',       // bandeau bleu/violet du titre
-          banner: '#3a3aef',       // bandeau "Play Football Games at..."
-          cell: '#d3f04a',         // lime — cases validées (correct)
-          cellEmpty: '#1f1f28',    // gris foncé — cases pas encore jouées
-          cellLocked: '#e85f5f',   // rouge — cases ratées
-          accent: '#d3f04a',       // accent lime pour CTA
-          textDark: '#0d0d12',     // texte noir sur fond lime
-          textMuted: '#9ca3af',    // gris clair sur cases vides
+          bg: '#0d0d12',                // fond très sombre
+          header: '#3b3aff',            // bandeau bleu/violet du titre
+          banner: '#3a3aef',            // bandeau "Play Football Games at..."
+          cell: '#d3f04a',              // lime — cases validées (correct)
+          cellEmpty: '#1c1c25',         // case vide "sombre" du plateau
+          cellEmptyLight: '#262631',    // case vide "claire" — alternance checkerboard
+          cellLocked: '#e85f5f',        // rouge — cases ratées
+          accent: '#d3f04a',
+          textDark: '#0d0d12',
+          textMuted: '#9ca3af',
         },
       },
       fontFamily: {
