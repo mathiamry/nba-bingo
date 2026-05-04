@@ -107,3 +107,26 @@ Pour rafraîchir le pool de parties, relance la commande Python.
 - **Joueurs / équipes / matchs 2024-25** dérivés des CSV du dataset.
 - **Awards / nationalité / draft** enrichis manuellement pour ~50 stars dans `nba_dataset_loader.py`.
 - Pour étendre : ajouter une entrée à `ENRICHMENT_BY_NAME` (clé = nom EXACT du CSV, avec diacritiques type `Dončić`).
+
+### Rafraîchir avec la saison en cours (nba_api)
+
+Le `nba-dataset.zip` est figé sur 2024-25. Pour intégrer les transactions
+2025-26 (signatures, trades), il y a un fetcher live :
+
+```bash
+# 1. Setup une fois
+python3 -m venv .venv
+.venv/bin/pip install -e ./nba_api-master
+.venv/bin/pip install requests numpy
+
+# 2. Fetch les rosters actuels (~30s, 30 calls API)
+.venv/bin/python fetch_live_data.py --season 2025-26
+
+# 3. Régénère les parties (le loader merge automatiquement)
+python3 nba_bingo_grid.py
+```
+
+Le snapshot `nba_dataset_extracted/live_202526.json` est commité et utilisé
+par `nba_dataset_loader.py` pour patcher les `team_seasons` des joueurs avec
+leur équipe actuelle. Re-exécute `fetch_live_data.py` à chaque fois que tu
+veux capter les nouvelles transactions.

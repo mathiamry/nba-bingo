@@ -17,6 +17,7 @@ disponible dans les deux fichiers.
 from __future__ import annotations
 
 import csv
+import json
 import os
 from collections import defaultdict
 from typing import Optional
@@ -1118,13 +1119,33 @@ def _aggregate_historical(rows: list[dict]) -> dict[int, dict]:
 # Chargement principal
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Overrides manuels (équipe, saison) pour patcher les transactions
-# récentes que le dataset 2024-25 ne couvre pas. À étendre au fil
-# des signatures importantes — l'idéal serait de remplacer le CSV par
-# un fetch live via nba_api une fois par mois.
-TEAM_SEASONS_OVERRIDES: dict[str, set[tuple[str, int]]] = {
-    "Seth Curry": {("GSW", 2025)},
-}
+# Overrides manuels (équipe, saison) pour patcher des cas que ni les
+# CSV ni le snapshot live nba_api ne couvrent. À étendre uniquement
+# pour des cas particuliers — pour la mise à jour normale, lance
+# `python fetch_live_data.py` qui rafraîchit les rosters de l'année.
+TEAM_SEASONS_OVERRIDES: dict[str, set[tuple[str, int]]] = {}
+
+
+def _load_live_snapshots() -> list[dict]:
+    """
+    Charge tous les snapshots `live_*.json` produits par fetch_live_data.py.
+    Permet d'avoir les rosters de la saison en cours alors que les CSV
+    s'arrêtent à 2024-25.
+    """
+    import glob
+    snaps: list[dict] = []
+    pattern = os.path.join(
+        os.path.dirname(__file__) or ".",
+        "nba_dataset_extracted",
+        "live_*.json",
+    )
+    for path in sorted(glob.glob(pattern)):
+        try:
+            with open(path, encoding="utf-8") as f:
+                snaps.append(json.load(f))
+        except Exception:
+            continue
+    return snaps
 
 
 def _fame_score(p: Player) -> float:
@@ -1254,6 +1275,13 @@ def load_real_dataset(
             team_seasons=frozenset(team_seasons),
         ))
 
+    # Merge des snapshots live (rosters NBA actuels via fetch_live_data.py)
+    # avant le filtre top_n. Patch les team_seasons des joueurs déjà connus
+    # avec la saison en cours et ajoute les nouvelles transactions.
+    snapshots = _load_live_snapshots()
+    if snapshots:
+        players = _merge_live_snapshots(players, name_by_id, snapshots)
+
     # Filtre vers les `top_n` joueurs les plus connus pour éviter d'avoir
     # majoritairement des role players obscurs dans le pool.
     if top_n is not None and len(players) > top_n:
@@ -1262,6 +1290,71 @@ def load_real_dataset(
 
     categories = _build_categories(players, nick_by_abbr)
     return categories, players
+
+
+def _merge_live_snapshots(
+    players: list[Player],
+    name_by_id: dict[int, str],
+    snapshots: list[dict],
+) -> list[Player]:
+    """
+    Pour chaque snapshot {season, rosters: {abbr: [{player_id, name, ...}]}},
+    on patche `team_seasons` et `teams` des Player existants. Les rookies
+    pas dans nos CSV sont ajoutés en minimal — ils seront généralement
+    écartés par le filtre top_n vu qu'ils ont 0 stat de carrière agrégée.
+    """
+    by_id = {p.id: p for p in players}
+    for snap in snapshots:
+        season = snap.get("season", "")
+        try:
+            year = int(season.split("-")[0])
+        except (ValueError, IndexError):
+            continue
+        rosters = snap.get("rosters", {})
+        for abbr, plist in rosters.items():
+            if not isinstance(plist, list):
+                continue
+            for entry in plist:
+                pid = entry.get("player_id")
+                if not isinstance(pid, int):
+                    continue
+                if pid in by_id:
+                    p = by_id[pid]
+                    if (abbr, year) in p.team_seasons:
+                        continue  # déjà connu
+                    by_id[pid] = Player(
+                        id=p.id,
+                        name=p.name,
+                        teams=frozenset(p.teams | {abbr}),
+                        nationality=p.nationality,
+                        awards=p.awards,
+                        draft_pick=p.draft_pick,
+                        draft_round=p.draft_round,
+                        career_ppg=p.career_ppg,
+                        career_rpg=p.career_rpg,
+                        career_apg=p.career_apg,
+                        seasons=frozenset(p.seasons | {year}),
+                        is_champion=p.is_champion,
+                        team_seasons=frozenset(p.team_seasons | {(abbr, year)}),
+                    )
+                else:
+                    name = entry.get("name") or name_by_id.get(pid, f"Player {pid}")
+                    by_id[pid] = Player(
+                        id=pid,
+                        name=name,
+                        teams=frozenset({abbr}),
+                        nationality="",
+                        awards=frozenset(),
+                        draft_pick=None,
+                        draft_round=None,
+                        career_ppg=0.0,
+                        career_rpg=0.0,
+                        career_apg=0.0,
+                        seasons=frozenset({year}),
+                        is_champion=False,
+                        team_seasons=frozenset({(abbr, year)}),
+                    )
+    return list(by_id.values())
 
 
 # ─────────────────────────────────────────────────────────────────────────────

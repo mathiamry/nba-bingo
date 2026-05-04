@@ -20,6 +20,10 @@ venv/
 # Sources upstream lourdes (téléchargées séparément, ré-extractibles)
 *.zip
 basketball_reference_extracted/
+nba_api-master/
+
+# Venv pour fetch_live_data.py (recréable via `python -m venv .venv`)
+.venv/
 
 # Artefact généré par python3 nba_bingo_grid.py — régénéré à chaque build
 frontend/public/game.json
