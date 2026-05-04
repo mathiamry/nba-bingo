@@ -1,11 +1,13 @@
 **/node_modules
 **/dist
 **/.vite
+**/.partykit
 **/.DS_Store
 .git
 .gitignore
 *.zip
 basketball_reference_extracted/
+partykit/
 README.md
 docker-compose.yml
 .dockerignore

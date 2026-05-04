@@ -9,6 +9,8 @@ RUN python nba_bingo_grid.py
 
 # === Stage 2 : build du frontend Vue ===
 FROM node:20-alpine AS frontend-build
+ARG VITE_PARTYKIT_HOST=127.0.0.1:1999
+ENV VITE_PARTYKIT_HOST=$VITE_PARTYKIT_HOST
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci

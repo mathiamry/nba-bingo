@@ -1,0 +1,14 @@
+{
+  "name": "nba-bingo-party",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "partykit dev",
+    "deploy": "partykit deploy",
+    "tail": "partykit tail"
+  },
+  "devDependencies": {
+    "partykit": "^0.0.115",
+    "typescript": "^5.4.5"
+  }
+}

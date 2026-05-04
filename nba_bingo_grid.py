@@ -981,4 +981,11 @@ if __name__ == "__main__":
     out_path = "frontend/public/game.json"
     export_games_to_json(games, out_path)
     print(f"\n💾 {len(games)} parties exportées vers {out_path}")
+
+    # Le serveur PartyKit (multijoueur) a besoin du même pool.
+    party_path = "partykit/src/games.json"
+    if os.path.isdir(os.path.dirname(party_path)):
+        export_games_to_json(games, party_path)
+        print(f"   ↳ aussi vers {party_path} (PartyKit)")
+
     print(f"   Score parfait par grille : {TOTAL_PERFECT_SCORE} pts")

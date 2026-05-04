@@ -1,12 +1,36 @@
 <script setup>
-import { onMounted, onBeforeUnmount, ref, watch, computed } from 'vue'
+import { onMounted, onBeforeUnmount, ref, computed, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useGameStore } from './stores/game.js'
 import GridCell from './components/GridCell.vue'
 import PlayerCard from './components/PlayerCard.vue'
 import StatusBanner from './components/StatusBanner.vue'
 import RecapModal from './components/RecapModal.vue'
+import HomeScreen from './components/HomeScreen.vue'
+import MultiplayerRoom from './components/MultiplayerRoom.vue'
 
+// ─── Hash routing ────────────────────────────────────────────────────────
+function parseHash() {
+  const raw = window.location.hash.slice(1) || '/'
+  if (raw.startsWith('/r/')) {
+    const code = raw.slice(3).toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12)
+    if (code) return { name: 'room', code }
+  }
+  if (raw === '/solo') return { name: 'solo' }
+  return { name: 'home' }
+}
+
+const route = ref(parseHash())
+function onHashChange() {
+  route.value = parseHash()
+}
+window.addEventListener('hashchange', onHashChange)
+
+function navigate(path) {
+  window.location.hash = path
+}
+
+// ─── Solo mode (lazy-init le store quand on entre en /solo) ─────────────
 const game = useGameStore()
 const {
   cells,
@@ -14,7 +38,6 @@ const {
   cellStates,
   currentPlayer,
   turnIndex,
-  strikes,
   rules,
   isPlaying,
   isEnded,
@@ -29,98 +52,122 @@ const {
 } = storeToRefs(game)
 
 const modalDismissed = ref(false)
-const showRecap = computed(() => isEnded.value && !modalDismissed.value)
+const showRecap = computed(
+  () => route.value.name === 'solo' && isEnded.value && !modalDismissed.value,
+)
 
-onMounted(() => {
-  game.loadGame()
-})
+// Charge la partie quand on entre en /solo, et nettoie quand on en sort
+watch(
+  () => route.value.name,
+  (name, prev) => {
+    if (name === 'solo' && prev !== 'solo') {
+      modalDismissed.value = false
+      game.loadGame()
+    } else if (prev === 'solo' && name !== 'solo') {
+      game._stopTimer()
+    }
+  },
+  { immediate: true },
+)
 
-onBeforeUnmount(() => {
-  game._stopTimer()
-})
-
-// Quand une nouvelle partie démarre, on autorise à nouveau le modal pour la prochaine fin.
 watch(isPlaying, (playing) => {
   if (playing) modalDismissed.value = false
 })
 
 const errorsCount = computed(() => placedCount.value - game.correctCount)
 
-function handleSetName(name) {
-  game.setPlayerName(name)
-}
+function handleSetName(name) { game.setPlayerName(name) }
+function handleRestart() { modalDismissed.value = false; game.reset() }
+function handleCloseRecap() { modalDismissed.value = true }
 
-function handleRestart() {
-  modalDismissed.value = false
-  game.reset()
-}
-
-function handleCloseRecap() {
-  modalDismissed.value = true
-}
+onBeforeUnmount(() => {
+  window.removeEventListener('hashchange', onHashChange)
+  game._stopTimer()
+})
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col items-center pb-10">
-    <header class="w-full bg-bingo-header py-5 px-4 text-center">
+    <!-- Header (toujours visible, clic = retour home) -->
+    <header
+      class="w-full bg-bingo-header py-5 px-4 text-center cursor-pointer select-none"
+      @click="navigate('/')"
+    >
       <h1 class="text-2xl sm:text-3xl font-extrabold tracking-[0.2em] uppercase">NBA BINGO</h1>
     </header>
 
-    <div class="w-full bg-bingo-banner/80 py-2 text-center text-xs sm:text-sm">
-      Place chaque joueur dans une case valide. {{ rules.secondsPerTurn }}s par tour.
-    </div>
-
-    <main class="w-full max-w-md px-3 mt-4 flex flex-col gap-4">
-      <StatusBanner
-        :ended="isEnded"
-        :won="won"
-        :placed-count="placedCount"
-        :total="rules.gridSize"
-        @restart="handleRestart"
-      />
-
-      <PlayerCard
-        v-if="!isEnded"
-        :player="currentPlayer"
-        :turn-index="turnIndex"
-        :total-turns="sequence.length"
-        :time-left="timeLeftSeconds"
-        :timer-progress="timerProgress"
-        @skip="game.skipPlayer()"
-      />
-
-      <div v-if="cells.length === 16" class="grid grid-cols-4 gap-2">
-        <GridCell
-          v-for="cell in cells"
-          :key="cell.id"
-          :cell="cell"
-          :state="cellStates[cell.id]"
-          :reveal-errors="isEnded"
-          :disabled="!isPlaying || !currentPlayer"
-          @click="(id) => game.placePlayer(id)"
-        />
-      </div>
-
-      <div v-if="error" class="bg-bingo-cellLocked/20 border border-bingo-cellLocked rounded-xl p-4 text-sm">
-        Impossible de charger la partie : {{ error }}.<br />
-        Lance <code class="bg-black/40 px-1 rounded">python3 nba_bingo_grid.py</code> à la racine pour générer
-        <code class="bg-black/40 px-1 rounded">frontend/public/game.json</code>.
-      </div>
-      <div v-else-if="!cells.length" class="text-center opacity-60 py-10">Chargement…</div>
-    </main>
-
-    <!-- Récap en popup -->
-    <RecapModal
-      :show="showRecap"
-      :player-name="playerName"
-      :score="score"
-      :placed="placedCount"
-      :total="rules.gridSize"
-      :errors-count="errorsCount"
-      :won="won"
-      @name="handleSetName"
-      @restart="handleRestart"
-      @close="handleCloseRecap"
+    <!-- HOME -->
+    <HomeScreen
+      v-if="route.name === 'home'"
+      @solo="navigate('/solo')"
+      @navigate="navigate"
     />
+
+    <!-- ROOM (multijoueur) -->
+    <MultiplayerRoom
+      v-else-if="route.name === 'room'"
+      :key="route.code"
+      :room-code="route.code"
+      @leave="navigate('/')"
+    />
+
+    <!-- SOLO -->
+    <template v-else-if="route.name === 'solo'">
+      <div class="w-full bg-bingo-banner/80 py-2 text-center text-xs sm:text-sm">
+        Mode solo — {{ rules.secondsPerTurn }}s par tour, grille parfaite : {{ rules.totalPerfectScore }} pts.
+      </div>
+
+      <main class="w-full max-w-md px-3 mt-4 flex flex-col gap-4">
+        <StatusBanner
+          :ended="isEnded"
+          :won="won"
+          :placed-count="placedCount"
+          :total="rules.gridSize"
+          @restart="handleRestart"
+        />
+
+        <PlayerCard
+          v-if="!isEnded"
+          :player="currentPlayer"
+          :turn-index="turnIndex"
+          :total-turns="sequence.length"
+          :time-left="timeLeftSeconds"
+          :timer-progress="timerProgress"
+          @skip="game.skipPlayer()"
+        />
+
+        <div v-if="cells.length === 16" class="grid grid-cols-4 gap-2">
+          <GridCell
+            v-for="cell in cells"
+            :key="cell.id"
+            :cell="cell"
+            :state="cellStates[cell.id]"
+            :reveal-errors="isEnded"
+            :disabled="!isPlaying || !currentPlayer"
+            @click="(id) => game.placePlayer(id)"
+          />
+        </div>
+
+        <div v-if="error" class="bg-bingo-cellLocked/20 border border-bingo-cellLocked rounded-xl p-4 text-sm">
+          Impossible de charger la partie : {{ error }}.<br />
+          Lance <code class="bg-black/40 px-1 rounded">python3 nba_bingo_grid.py</code> pour générer
+          <code class="bg-black/40 px-1 rounded">frontend/public/game.json</code>.
+        </div>
+        <div v-else-if="!cells.length" class="text-center opacity-60 py-10">Chargement…</div>
+      </main>
+
+      <RecapModal
+        :show="showRecap"
+        :player-name="playerName"
+        :score="score"
+        :placed="placedCount"
+        :total="rules.gridSize"
+        :errors-count="errorsCount"
+        :won="won"
+        @name="handleSetName"
+        @restart="handleRestart"
+        @close="handleCloseRecap"
+      />
+    </template>
   </div>
 </template>

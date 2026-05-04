@@ -1,6 +1,11 @@
 services:
   nba-bingo:
-    build: .
+    build:
+      context: .
+      args:
+        # Override pour pointer vers le serveur PartyKit déployé en prod.
+        # Ex: nba-bingo.tonpseudo.partykit.dev
+        VITE_PARTYKIT_HOST: ${VITE_PARTYKIT_HOST:-127.0.0.1:1999}
     container_name: nba-bingo
     ports:
       - "8080:80"

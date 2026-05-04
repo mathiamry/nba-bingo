@@ -12,11 +12,17 @@ const props = defineProps({
 defineEmits(['click'])
 
 const isEmpty = computed(() => props.state.status === CELL_STATUS.EMPTY)
-const isFilled = computed(() => props.state.status === CELL_STATUS.FILLED)
-// "wrong" n'est révélé que si revealErrors est vrai (en fin de partie).
-const showWrong = computed(
-  () => props.revealErrors && isFilled.value && props.state.wasCorrect === false,
+// "filled" couvre les placements corrects ET les erronés (vert pendant le jeu).
+// Le serveur multijoueur envoie status='wrong' uniquement quand on doit révéler.
+const isFilled = computed(
+  () => props.state.status === 'filled' || props.state.status === 'wrong',
 )
+// "wrong" n'est révélé que si revealErrors est vrai (en fin de partie).
+const showWrong = computed(() => {
+  if (!props.revealErrors) return false
+  if (props.state.status === 'wrong') return true
+  return isFilled.value && props.state.wasCorrect === false
+})
 
 const axisIcon = computed(() => {
   switch (props.cell.axis) {

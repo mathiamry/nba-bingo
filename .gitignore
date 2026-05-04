@@ -23,3 +23,11 @@ basketball_reference_extracted/
 
 # Artefact généré par python3 nba_bingo_grid.py — régénéré à chaque build
 frontend/public/game.json
+partykit/src/games.json
+
+# Variables Vite locales
+frontend/.env
+frontend/.env.local
+
+# PartyKit local
+partykit/.partykit/
