@@ -2,5 +2,6 @@
   "$schema": "https://www.partykit.io/schema.json",
   "name": "nba-bingo",
   "main": "src/server.ts",
-  "compatibilityDate": "2024-09-01"
+  "compatibilityDate": "2024-09-01",
+  "serve": "../frontend/dist"
 }

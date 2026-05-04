@@ -66,7 +66,15 @@ export const useGameStore = defineStore('game', {
       return this.correctCount
     },
     score(state) {
-      return this.correctCount * (state.rules.pointsPerCell || 0)
+      // Somme des points des cases correctement remplies.
+      // Chaque case porte sa propre valeur (pondérée par difficulté côté
+      // Python), total parfait = 60 pts en entiers.
+      return state.cells.reduce((sum, c) => {
+        const s = state.cellStates[c.id]
+        return s && s.status === CELL_STATUS.FILLED && s.wasCorrect === true
+          ? sum + (c.points || 0)
+          : sum
+      }, 0)
     },
     isPlaying(state) {
       return state.status === GAME_STATUS.PLAYING

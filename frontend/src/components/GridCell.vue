@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { CELL_STATUS } from '../stores/game.js'
 
 const props = defineProps({
@@ -38,6 +38,49 @@ const axisIcon = computed(() => {
   }
 })
 
+// Mapping abbréviation NBA → fichier logo (le zip a quelques quirks).
+const LOGO_FILE_MAP = {
+  phi: 'phl', // Philadelphia 76ers
+  uta: 'uth', // Utah Jazz
+}
+const LOGO_EXT_MAP = {
+  mia: 'gif', // seul fichier en GIF
+}
+
+const teamLogoUrl = computed(() => {
+  if (props.cell.axis !== 'TEAM') return null
+  if (!props.cell.id?.startsWith('team_')) return null
+  const abbr = props.cell.id.slice(5).toLowerCase()
+  if (abbr.length !== 3) return null
+  const file = LOGO_FILE_MAP[abbr] || abbr
+  const ext = LOGO_EXT_MAP[abbr] || 'png'
+  return `/logos/${file}.${ext}`
+})
+
+// Mapping ISO alpha-3 (utilisé dans le dataset) → alpha-2 (flagcdn.com).
+const FLAG_ALPHA2 = {
+  USA: 'us', FRA: 'fr', CAN: 'ca', SRB: 'rs',
+  GRC: 'gr', ESP: 'es', SVN: 'si', DEU: 'de',
+  CMR: 'cm', DOM: 'do', TUR: 'tr', FIN: 'fi',
+  LTU: 'lt', AUS: 'au', MNE: 'me', HRV: 'hr',
+  ARG: 'ar', BIH: 'ba', BRA: 'br', GBR: 'gb',
+  ITA: 'it', NGR: 'ng', RUS: 'ru', SWE: 'se',
+}
+
+const flagUrl = computed(() => {
+  if (props.cell.axis !== 'NATIONALITY') return null
+  if (!props.cell.id?.startsWith('nat_')) return null
+  const code3 = props.cell.id.slice(4).toUpperCase()
+  const code2 = FLAG_ALPHA2[code3]
+  if (!code2) return null
+  return `https://flagcdn.com/w80/${code2}.png`
+})
+
+const imgLoaded = ref(true)
+function onImgError() {
+  imgLoaded.value = false
+}
+
 const cellClasses = computed(() => {
   if (showWrong.value) return 'bg-bingo-cellLocked text-white border-bingo-cellLocked'
   if (isFilled.value) return 'bg-bingo-cell text-bingo-textDark border-bingo-cell'
@@ -61,13 +104,36 @@ const interactable = computed(() => !props.disabled && isEmpty.value)
   >
     <span v-if="statusLabel" class="absolute top-1 right-2 text-xs font-bold opacity-80">{{ statusLabel }}</span>
 
-    <div :class="['text-2xl mb-1', isEmpty ? 'opacity-70' : '']" aria-hidden="true">{{ axisIcon }}</div>
+    <img
+      v-if="teamLogoUrl && imgLoaded"
+      :src="teamLogoUrl"
+      alt=""
+      class="w-9 h-9 mb-1 object-contain"
+      :class="isEmpty ? 'opacity-90' : ''"
+      @error="onImgError"
+    />
+    <img
+      v-else-if="flagUrl && imgLoaded"
+      :src="flagUrl"
+      alt=""
+      class="w-9 h-6 mb-1 object-contain rounded-sm shadow-sm"
+      :class="isEmpty ? 'opacity-90' : ''"
+      @error="onImgError"
+    />
+    <div
+      v-else
+      :class="['text-2xl mb-1', isEmpty ? 'opacity-70' : '']"
+      aria-hidden="true"
+    >{{ axisIcon }}</div>
 
     <div :class="['text-[10px] uppercase tracking-wide leading-tight px-1', isEmpty ? 'text-bingo-textMuted' : '']">
       {{ cell.label }}
     </div>
 
-    <div v-if="state.playerName" class="mt-1 text-[9px] font-bold uppercase tracking-wider opacity-90 leading-tight">
+    <div
+      v-if="state.playerName"
+      class="mt-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-tight opacity-90 leading-[1.05] break-words w-full max-h-[2.4em] overflow-hidden"
+    >
       {{ state.playerName }}
     </div>
   </button>

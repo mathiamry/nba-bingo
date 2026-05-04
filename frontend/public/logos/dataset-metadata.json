@@ -1,0 +1,15 @@
+{
+  "title": "NBA Logos Dataset",
+  "id": "ncmoliver/nba-logos-dataset",
+  "licenses": [
+    {
+      "name": "CC0-1.0"
+    }
+  ],
+  "resources": [
+    {
+      "path": "nba_logos.zip",
+      "description": "Zipped folder of NBA team logos"
+    }
+  ]
+}

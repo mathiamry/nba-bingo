@@ -28,6 +28,8 @@ partykit/src/games.json
 # Variables Vite locales
 frontend/.env
 frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
 
 # PartyKit local
 partykit/.partykit/

@@ -20,6 +20,7 @@ type Cell = {
   label: string;
   axis: string;
   difficulty: number;
+  points: number;
 };
 
 type SequenceEntry = {
@@ -67,10 +68,12 @@ type RoomState = {
   hostId: string | null;
   players: Record<string, Player>;
   game: Game | null;
+  startedAt: number; // ms epoch — pour calculer le temps de completion
   // Progression INDIVIDUELLE par joueur (race async)
   playerTurnIndex: Record<string, number>;
   playerTurnEndsAt: Record<string, number>;
   playerDone: Record<string, boolean>;
+  playerCompletedAt: Record<string, number>; // ms epoch — tiebreaker
   placements: Record<string, Placement[]>;
 };
 
@@ -86,9 +89,12 @@ type LeaderboardEntry = {
   id: string;
   name: string;
   placed: number;
+  skipped: number;        // cases laissées vides (skip + timeout)
   done: boolean;
-  correct: number; // 0 tant que reveal=false
-  score: number;   // idem
+  correct: number;        // 0 tant que reveal=false
+  score: number;          // idem
+  completedAtMs: number;  // 0 si pas encore done
+  durationMs: number;     // temps écoulé entre start et done (0 si pas done)
 };
 
 function viewForRecipient(state: RoomState, recipientId: string) {
@@ -122,19 +128,40 @@ function viewForRecipient(state: RoomState, recipientId: string) {
       ? state.game.sequence[myTurn] ?? null
       : null;
 
+  // Map cellId → points pour le calcul de score (variable par case selon
+  // la difficulté, somme exacte = 60).
+  const pointsByCell = new Map<string, number>();
+  if (state.game) {
+    for (const c of state.game.cells) pointsByCell.set(c.id, c.points);
+  }
+
   // Leaderboard : progression de tous (placed = posées, done flag, score au reveal)
   const leaderboard: LeaderboardEntry[] = Object.values(state.players).map(
     (p) => {
       const places = state.placements[p.id] || [];
       const placed = places.filter((pl) => pl.cellId !== null).length;
-      const correct = places.filter((pl) => pl.wasCorrect === true).length;
+      const skipped = places.filter((pl) => pl.cellId === null).length;
+      const correctPlaces = places.filter((pl) => pl.wasCorrect === true);
+      const correct = correctPlaces.length;
+      const score = correctPlaces.reduce(
+        (s, pl) => s + (pointsByCell.get(pl.cellId!) ?? 0),
+        0,
+      );
+      const completedAtMs = state.playerCompletedAt[p.id] ?? 0;
+      const durationMs =
+        completedAtMs && state.startedAt
+          ? completedAtMs - state.startedAt
+          : 0;
       return {
         id: p.id,
         name: p.name,
         placed,
+        skipped,
         done: state.playerDone[p.id] === true,
         correct: reveal ? correct : 0,
-        score: reveal ? correct * POOL.rules.pointsPerCell : 0,
+        score: reveal ? score : 0,
+        completedAtMs: reveal ? completedAtMs : 0,
+        durationMs: reveal ? durationMs : 0,
       };
     },
   );
@@ -177,9 +204,11 @@ export default class NbaBingoServer implements Party.Server {
       hostId: null,
       players: {},
       game: null,
+      startedAt: 0,
       playerTurnIndex: {},
       playerTurnEndsAt: {},
       playerDone: {},
+      playerCompletedAt: {},
       placements: {},
     };
   }
@@ -233,6 +262,7 @@ export default class NbaBingoServer implements Party.Server {
       this.state.playerTurnIndex[conn.id] = 0;
       this.state.playerTurnEndsAt[conn.id] = 0;
       this.state.playerDone[conn.id] = false;
+      this.state.playerCompletedAt[conn.id] = 0;
       if (!this.state.hostId) this.state.hostId = conn.id;
     } else {
       this.state.players[conn.id].name = name;
@@ -252,6 +282,7 @@ export default class NbaBingoServer implements Party.Server {
     delete this.state.playerTurnIndex[id];
     delete this.state.playerTurnEndsAt[id];
     delete this.state.playerDone[id];
+    delete this.state.playerCompletedAt[id];
     if (this.state.hostId === id) {
       const remaining = Object.keys(this.state.players);
       this.state.hostId = remaining[0] ?? null;
@@ -275,12 +306,14 @@ export default class NbaBingoServer implements Party.Server {
 
     this.state.game = POOL.games[Math.floor(Math.random() * POOL.games.length)];
     this.state.status = "playing";
+    this.state.startedAt = Date.now();
 
     for (const id of Object.keys(this.state.players)) {
       this.state.placements[id] = [];
       this.state.playerTurnIndex[id] = 0;
       this.state.playerTurnEndsAt[id] = 0;
       this.state.playerDone[id] = false;
+      this.state.playerCompletedAt[id] = 0;
       this.beginPlayerTurn(id);
     }
     this.broadcast();
@@ -297,11 +330,13 @@ export default class NbaBingoServer implements Party.Server {
     for (const id of this.playerTimers.keys()) this.clearPlayerTimer(id);
     this.state.status = "lobby";
     this.state.game = null;
+    this.state.startedAt = 0;
     for (const id of Object.keys(this.state.players)) {
       this.state.placements[id] = [];
       this.state.playerTurnIndex[id] = 0;
       this.state.playerTurnEndsAt[id] = 0;
       this.state.playerDone[id] = false;
+      this.state.playerCompletedAt[id] = 0;
     }
   }
 
@@ -353,6 +388,7 @@ export default class NbaBingoServer implements Party.Server {
     this.clearPlayerTimer(playerId);
     this.state.playerDone[playerId] = true;
     this.state.playerTurnEndsAt[playerId] = 0;
+    this.state.playerCompletedAt[playerId] = Date.now();
     if (this.allPlayersDone()) {
       this.endGame();
     }

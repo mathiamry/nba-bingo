@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import PartySocket from 'partysocket'
 
-const HOST = import.meta.env.VITE_PARTYKIT_HOST || '127.0.0.1:1999'
+// En prod, le frontend est servi par PartyKit lui-même → on tape la même
+// origine via window.location.host. En dev local, l'override va sur le
+// dev server PartyKit (127.0.0.1:1999) via .env.development.local.
+const HOST =
+  import.meta.env.VITE_PARTYKIT_HOST ||
+  (typeof window !== 'undefined' ? window.location.host : '127.0.0.1:1999')
 const NAME_KEY = 'nbaBingoPlayerName'
 
 const ConnStatus = {

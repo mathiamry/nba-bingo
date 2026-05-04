@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "partykit dev",
+    "build:frontend": "cd ../frontend && npm run build",
+    "predeploy": "npm run build:frontend",
     "deploy": "partykit deploy",
     "tail": "partykit tail"
   },

@@ -65,7 +65,10 @@ const ringColor = computed(() => {
           {{ Math.ceil(timeLeft) }}s
         </div>
       </div>
-      <div class="text-xl font-bold truncate">
+      <div
+        class="font-bold leading-tight break-words"
+        :class="player && player.name.length > 18 ? 'text-base sm:text-lg' : 'text-lg sm:text-xl'"
+      >
         {{ player ? player.name : 'En attente…' }}
       </div>
       <div class="text-xs opacity-60 mt-1">

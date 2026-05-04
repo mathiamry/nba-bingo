@@ -155,6 +155,12 @@ MAX_STRIKES = 2                  # affiché en feedback, ne termine plus la part
 TOTAL_PERFECT_SCORE = 60         # score d'une grille parfaitement remplie
 SECONDS_PER_TURN = 10            # temps imparti par tour avant auto-skip
 
+# Une catégorie ne peut figurer dans une grille que si au moins ce nombre
+# de joueurs du dataset matche. À 2 on garde les cases "pièges" (Slovénie,
+# Croatie, Sixth Man…) tout en évitant les cellules à 1 seul joueur unique
+# qui sont fragiles pour le matching biparti.
+MIN_POOL_SIZE = 2
+
 
 def _draw_quotas_summing_to(
     quotas: dict, total: int, rng: random.Random
@@ -244,8 +250,10 @@ def _generate_grid_attempt(
     qui a le moins de catégories disponibles (MRV strict). On essaie
     chaque candidat de cet axe, en respectant les quotas de difficulté.
     """
-    # Filtre les catégories vides : elles ne peuvent jamais être validées
-    usable = [c for c in categories if c.pool_size > 0]
+    # Filtre les catégories au pool trop petit : on veut au moins
+    # MIN_POOL_SIZE joueurs valides par case pour éviter les cellules
+    # "à 1 joueur unique" peu intéressantes et fragiles.
+    usable = [c for c in categories if c.pool_size >= MIN_POOL_SIZE]
 
     by_axis: dict[Axis, list[Category]] = {a: [] for a in Axis}
     for c in usable:
@@ -431,7 +439,7 @@ def generate_shared_sequence(
     match_matrix: list[list[bool]],
     category_indices: list[int],
     rng: random.Random,
-    sequence_length: int = 24,
+    sequence_length: int = 60,
     max_attempts: int = 50,
 ) -> Optional[list[int]]:
     """
@@ -593,6 +601,29 @@ def generate_balanced_grid(
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+def _distribute_points(
+    cells: list[Category], total: int = TOTAL_PERFECT_SCORE
+) -> list[int]:
+    """
+    Répartit `total` points (60) entre les cases, proportionnellement à
+    leur difficulté, avec arrondi déterministe pour que la somme soit
+    exactement `total`. Une case D5 vaut donc plus qu'une case D1.
+    """
+    weights = [c.difficulty for c in cells]
+    sum_w = sum(weights) or 1
+    raw = [total * w / sum_w for w in weights]
+    floored = [int(r) for r in raw]
+    remainder = total - sum(floored)
+    by_frac = sorted(
+        range(len(cells)),
+        key=lambda i: (raw[i] - floored[i], cells[i].difficulty),
+        reverse=True,
+    )
+    for i in by_frac[:remainder]:
+        floored[i] += 1
+    return floored
+
+
 def _build_game_dict(
     grid: Grid,
     players: list[Player],
@@ -600,14 +631,16 @@ def _build_game_dict(
     stats: Optional[dict] = None,
 ) -> dict:
     """Sérialise une partie (grille + séquence) en dict JSON-compatible."""
+    points = _distribute_points(grid.cells)
     cells = [
         {
             "id": c.id,
             "label": c.label,
             "axis": c.axis.value,
             "difficulty": c.difficulty,
+            "points": pts,
         }
-        for c in grid.cells
+        for c, pts in zip(grid.cells, points)
     ]
 
     seq_data = []
