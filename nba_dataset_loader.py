@@ -1118,10 +1118,35 @@ def _aggregate_historical(rows: list[dict]) -> dict[int, dict]:
 # Chargement principal
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Overrides manuels (équipe, saison) pour patcher les transactions
+# récentes que le dataset 2024-25 ne couvre pas. À étendre au fil
+# des signatures importantes — l'idéal serait de remplacer le CSV par
+# un fetch live via nba_api une fois par mois.
+TEAM_SEASONS_OVERRIDES: dict[str, set[tuple[str, int]]] = {
+    "Seth Curry": {("GSW", 2025)},
+}
+
+
+def _fame_score(p: Player) -> float:
+    """
+    Score de notoriété grossier pour ranger les joueurs du plus connu
+    au plus obscur. Utilisé pour filtrer le pool aux ~500 joueurs les
+    plus reconnaissables, en gardant naturellement quelques pièges
+    parmi les role players de bas de tier.
+    """
+    score = p.career_ppg
+    score += len(p.awards) * 5.0
+    score += min(len(p.seasons), 12) * 0.5
+    if p.is_champion:
+        score += 5.0
+    return score
+
+
 def load_real_dataset(
     csv_dir: str,
     hist_csv: Optional[str] = None,
     min_games: int = 15,
+    top_n: Optional[int] = 500,
 ) -> tuple[list[Category], list[Player]]:
     """
     Charge et fusionne les deux sources de données NBA.
@@ -1134,6 +1159,9 @@ def load_real_dataset(
                 présents uniquement dans le dataset live. Les joueurs
                 exclusivement dans le dataset historique doivent avoir
                 joué ≥ 150 matchs au total.
+    top_n     : si défini, on ne garde que les `top_n` joueurs les plus
+                "connus" (cf. _fame_score) pour éviter d'avoir trop de
+                role players obscurs dans le pool. None = tout garder.
     """
     if hist_csv is None:
         hist_csv = os.path.join(
@@ -1188,6 +1216,13 @@ def load_real_dataset(
             (l["team_seasons"] if l else set())
             | (h["team_seasons"] if h else set())
         )
+
+        # Patch manuel pour les transactions récentes (Seth Curry, etc.)
+        name_for_override = name_by_id.get(pid, "")
+        ts_override = TEAM_SEASONS_OVERRIDES.get(name_for_override)
+        if ts_override:
+            team_seasons = team_seasons | ts_override
+            teams = teams | {t for t, _ in ts_override}
         seasons = (
             (l["seasons"] if l else set()) | (h["seasons"] if h else set())
         )
@@ -1218,6 +1253,12 @@ def load_real_dataset(
             is_champion=enrich.get("is_champion", False),
             team_seasons=frozenset(team_seasons),
         ))
+
+    # Filtre vers les `top_n` joueurs les plus connus pour éviter d'avoir
+    # majoritairement des role players obscurs dans le pool.
+    if top_n is not None and len(players) > top_n:
+        players.sort(key=_fame_score, reverse=True)
+        players = players[:top_n]
 
     categories = _build_categories(players, nick_by_abbr)
     return categories, players
