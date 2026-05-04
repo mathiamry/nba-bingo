@@ -239,7 +239,7 @@ const reconnecting = computed(
         </div>
       </div>
 
-      <div v-if="cells.length === 16" class="grid grid-cols-4 gap-2">
+      <div v-if="cells.length === 16" class="grid grid-cols-4 grid-rows-4 gap-2 aspect-square">
         <GridCell
           v-for="cell in cells"
           :key="cell.id"
@@ -276,7 +276,7 @@ const reconnecting = computed(
         :total="rules.gridSize"
       />
 
-      <div v-if="cells.length === 16" class="grid grid-cols-4 gap-2">
+      <div v-if="cells.length === 16" class="grid grid-cols-4 grid-rows-4 gap-2 aspect-square">
         <GridCell
           v-for="cell in cells"
           :key="cell.id"

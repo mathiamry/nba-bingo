@@ -94,21 +94,35 @@ const statusLabel = computed(() => {
 })
 
 const interactable = computed(() => !props.disabled && isEmpty.value)
+
+// Tailwind shrink-on-long-labels — évite les overflow tout en restant lisible.
+const labelClass = computed(() => {
+  const n = (props.cell.label || '').length
+  if (n > 22) return 'text-[8px] sm:text-[9px]'
+  if (n > 14) return 'text-[9px] sm:text-[10px]'
+  return 'text-[10px] sm:text-[11px]'
+})
+
+const playerNameClass = computed(() => {
+  const n = (props.state.playerName || '').length
+  if (n > 18) return 'text-[7px] sm:text-[8px]'
+  return 'text-[8px] sm:text-[9px]'
+})
 </script>
 
 <template>
   <button
     :disabled="!interactable"
-    :class="['relative aspect-square rounded-lg p-2 transition-all flex flex-col items-center justify-center text-center font-semibold border', cellClasses, interactable ? 'cursor-pointer' : 'cursor-default']"
+    :class="['relative rounded-lg p-1.5 sm:p-2 transition-all flex flex-col items-center justify-center text-center font-semibold border overflow-hidden h-full w-full', cellClasses, interactable ? 'cursor-pointer' : 'cursor-default']"
     @click="$emit('click', cell.id)"
   >
-    <span v-if="statusLabel" class="absolute top-1 right-2 text-xs font-bold opacity-80">{{ statusLabel }}</span>
+    <span v-if="statusLabel" class="absolute top-1 right-1.5 text-[10px] font-bold opacity-80">{{ statusLabel }}</span>
 
     <img
       v-if="teamLogoUrl && imgLoaded"
       :src="teamLogoUrl"
       alt=""
-      class="w-9 h-9 mb-1 object-contain"
+      class="w-7 h-7 sm:w-9 sm:h-9 mb-0.5 sm:mb-1 object-contain shrink-0"
       :class="isEmpty ? 'opacity-90' : ''"
       @error="onImgError"
     />
@@ -116,23 +130,32 @@ const interactable = computed(() => !props.disabled && isEmpty.value)
       v-else-if="flagUrl && imgLoaded"
       :src="flagUrl"
       alt=""
-      class="w-9 h-6 mb-1 object-contain rounded-sm shadow-sm"
+      class="w-7 h-5 sm:w-9 sm:h-6 mb-0.5 sm:mb-1 object-contain rounded-sm shadow-sm shrink-0"
       :class="isEmpty ? 'opacity-90' : ''"
       @error="onImgError"
     />
     <div
       v-else
-      :class="['text-2xl mb-1', isEmpty ? 'opacity-70' : '']"
+      :class="['text-xl sm:text-2xl mb-0.5 sm:mb-1 shrink-0 leading-none', isEmpty ? 'opacity-70' : '']"
       aria-hidden="true"
     >{{ axisIcon }}</div>
 
-    <div :class="['text-[10px] uppercase tracking-wide leading-tight px-1', isEmpty ? 'text-bingo-textMuted' : '']">
+    <div
+      :class="[
+        'uppercase tracking-tight leading-[1.1] px-0.5 break-words line-clamp-3 sm:line-clamp-2',
+        labelClass,
+        isEmpty ? 'text-bingo-textMuted' : '',
+      ]"
+    >
       {{ cell.label }}
     </div>
 
     <div
       v-if="state.playerName"
-      class="mt-1 text-[8px] sm:text-[9px] font-bold uppercase tracking-tight opacity-90 leading-[1.05] break-words w-full max-h-[2.4em] overflow-hidden"
+      :class="[
+        'mt-0.5 sm:mt-1 font-bold uppercase tracking-tight opacity-90 leading-[1.05] break-words w-full line-clamp-2',
+        playerNameClass,
+      ]"
     >
       {{ state.playerName }}
     </div>
