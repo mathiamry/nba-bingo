@@ -1,0 +1,4313 @@
+{
+  "fetched_at": "2026-05-04T19:58:10.094663+00:00Z",
+  "season": "pool",
+  "rosters": {},
+  "player_info": {
+    "950": {
+      "player_id": 950,
+      "country": "USA",
+      "draft_year": "1996",
+      "draft_round": "1",
+      "draft_number": "4",
+      "from_year": 1996,
+      "to_year": 2008
+    },
+    "200746": {
+      "player_id": 200746,
+      "country": "USA",
+      "draft_year": "2006",
+      "draft_round": "1",
+      "draft_number": "2",
+      "from_year": 2006,
+      "to_year": 2021
+    },
+    "202326": {
+      "player_id": 202326,
+      "country": "USA",
+      "draft_year": "2010",
+      "draft_round": "1",
+      "draft_number": "5",
+      "from_year": 2010,
+      "to_year": 2021
+    },
+    "299": {
+      "player_id": 299,
+      "country": "USA",
+      "draft_year": "1994",
+      "draft_round": "1",
+      "draft_number": "1",
+      "from_year": 1994,
+      "to_year": 2004
+    },
+    "2072": {
+      "player_id": 2072,
+      "country": "USA",
+      "draft_year": "2000",
+      "draft_round": "2",
+      "draft_number": "43",
+      "from_year": 2000,
+      "to_year": 2011
+    },
+    "2405": {
+      "player_id": 2405,
+      "country": "USA",
+      "draft_year": "2002",
+      "draft_round": "1",
+      "draft_number": "9",
+      "from_year": 2002,
+      "to_year": 2015
+    },
+    "1712": {
+      "player_id": 1712,
+      "country": "USA",
+      "draft_year": "1998",
+      "draft_round": "1",
+      "draft_number": "4",
+      "from_year": 1998,
+      "to_year": 2013
+    },
+    "949": {
+      "player_id": 949,
+      "country": "USA",
+      "draft_year": "1996",
+      "draft_round": "1",
+      "draft_number": "3",
+      "from_year": 1996,
+      "to_year": 2007
+    },
+    "101145": {
+      "player_id": 101145,
+      "country": "USA",
+      "draft_year": "2005",
+      "draft_round": "2",
+      "draft_number": "40",
+      "from_year": 2005,
+      "to_year": 2016
+    },
+    "952": {
+      "player_id": 952,
+      "country": "USA",
+      "draft_year": "1996",
+      "draft_round": "1",
+      "draft_number": "6",
+      "from_year": 1996,
+      "to_year": 2007
+    },
+    "2755": {
+      "player_id": 2755,
+      "country": "USA",
+      "draft_year": "2004",
+      "draft_round": "1",
+      "draft_number": "26",
+      "from_year": 2004,
+      "to_year": 2015
+    },
+    "208": {
+      "player_id": 208,
+      "country": "USA",
+      "draft_year": "1993",
+      "draft_round": "1",
+      "draft_number": "24",
+      "from_year": 1993,
+      "to_year": 2007
+    },
+    "2202": {
+      "player_id": 2202,
+      "country": "USA",
+      "draft_year": "2001",
+      "draft_round": "1",
+      "draft_number": "5",
+      "from_year": 2001,
+      "to_year": 2014
+    },
+    "275": {
+      "player_id": 275,
+      "country": "USA",
+      "draft_year": "1993",
+      "draft_round": "1",
+      "draft_number": "11",
+      "from_year": 1993,
+      "to_year": 2004
+    },
+    "1888": {
+      "player_id": 1888,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "7",
+      "from_year": 1999,
+      "to_year": 2012
+    },
+    "2397": {
+      "player_id": 2397,
+      "country": "China",
+      "draft_year": "2002",
+      "draft_round": "1",
+      "draft_number": "1",
+      "from_year": 2002,
+      "to_year": 2010
+    },
+    "978": {
+      "player_id": 978,
+      "country": "Serbia",
+      "draft_year": "1996",
+      "draft_round": "1",
+      "draft_number": "14",
+      "from_year": 1998,
+      "to_year": 2010
+    },
+    "711": {
+      "player_id": 711,
+      "country": "USA",
+      "draft_year": "1995",
+      "draft_round": "1",
+      "draft_number": "3",
+      "from_year": 1995,
+      "to_year": 2012
+    },
+    "2216": {
+      "player_id": 2216,
+      "country": "USA",
+      "draft_year": "2001",
+      "draft_round": "1",
+      "draft_number": "19",
+      "from_year": 2001,
+      "to_year": 2017
+    },
+    "1883": {
+      "player_id": 1883,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "2",
+      "from_year": 1999,
+      "to_year": 2007
+    },
+    "84": {
+      "player_id": 84,
+      "country": "USA",
+      "draft_year": "1992",
+      "draft_round": "1",
+      "draft_number": "24",
+      "from_year": 1992,
+      "to_year": 2004
+    },
+    "101114": {
+      "player_id": 101114,
+      "country": "USA",
+      "draft_year": "2005",
+      "draft_round": "1",
+      "draft_number": "3",
+      "from_year": 2005,
+      "to_year": 2016
+    },
+    "2430": {
+      "player_id": 2430,
+      "country": "USA",
+      "draft_year": "2002",
+      "draft_round": "2",
+      "draft_number": "34",
+      "from_year": 2002,
+      "to_year": 2014
+    },
+    "255": {
+      "player_id": 255,
+      "country": "USA",
+      "draft_year": "1994",
+      "draft_round": "1",
+      "draft_number": "3",
+      "from_year": 1994,
+      "to_year": 2012
+    },
+    "1884": {
+      "player_id": 1884,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "3",
+      "from_year": 1999,
+      "to_year": 2011
+    },
+    "2207": {
+      "player_id": 2207,
+      "country": "USA",
+      "draft_year": "2001",
+      "draft_round": "1",
+      "draft_number": "10",
+      "from_year": 2001,
+      "to_year": 2021
+    },
+    "1894": {
+      "player_id": 1894,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "13",
+      "from_year": 1999,
+      "to_year": 2012
+    },
+    "469": {
+      "player_id": 469,
+      "country": "USA",
+      "draft_year": "1993",
+      "draft_round": "1",
+      "draft_number": "4",
+      "from_year": 1993,
+      "to_year": 2003
+    },
+    "1882": {
+      "player_id": 1882,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "1",
+      "from_year": 1999,
+      "to_year": 2015
+    },
+    "203506": {
+      "player_id": 203506,
+      "country": "USA",
+      "draft_year": "2013",
+      "draft_round": "1",
+      "draft_number": "2",
+      "from_year": 2013,
+      "to_year": 2022
+    },
+    "200750": {
+      "player_id": 200750,
+      "country": "USA",
+      "draft_year": "2006",
+      "draft_round": "1",
+      "draft_number": "6",
+      "from_year": 2006,
+      "to_year": 2012
+    },
+    "101122": {
+      "player_id": 101122,
+      "country": "USA",
+      "draft_year": "2005",
+      "draft_round": "1",
+      "draft_number": "17",
+      "from_year": 2005,
+      "to_year": 2014
+    },
+    "200752": {
+      "player_id": 200752,
+      "country": "USA",
+      "draft_year": "2006",
+      "draft_round": "1",
+      "draft_number": "8",
+      "from_year": 2006,
+      "to_year": 2022
+    },
+    "714": {
+      "player_id": 714,
+      "country": "USA",
+      "draft_year": "1995",
+      "draft_round": "1",
+      "draft_number": "21",
+      "from_year": 1995,
+      "to_year": 2009
+    },
+    "2744": {
+      "player_id": 2744,
+      "country": "USA",
+      "draft_year": "2004",
+      "draft_round": "1",
+      "draft_number": "15",
+      "from_year": 2004,
+      "to_year": 2017
+    },
+    "201569": {
+      "player_id": 201569,
+      "country": "USA",
+      "draft_year": "2008",
+      "draft_round": "1",
+      "draft_number": "7",
+      "from_year": 2008,
+      "to_year": 2025
+    },
+    "1749": {
+      "player_id": 1749,
+      "country": "USA",
+      "draft_year": "1998",
+      "draft_round": "2",
+      "draft_number": "41",
+      "from_year": 1998,
+      "to_year": 2008
+    },
+    "782": {
+      "player_id": 782,
+      "country": "USA",
+      "draft_year": "1988",
+      "draft_round": "1",
+      "draft_number": "5",
+      "from_year": 1988,
+      "to_year": 2001
+    },
+    "1890": {
+      "player_id": 1890,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "9",
+      "from_year": 1999,
+      "to_year": 2014
+    },
+    "1497": {
+      "player_id": 1497,
+      "country": "USA",
+      "draft_year": "1997",
+      "draft_round": "1",
+      "draft_number": "3",
+      "from_year": 1997,
+      "to_year": 2013
+    },
+    "1536": {
+      "player_id": 1536,
+      "country": "USA",
+      "draft_year": "1997",
+      "draft_round": "2",
+      "draft_number": "42",
+      "from_year": 2000,
+      "to_year": 2013
+    },
+    "224": {
+      "player_id": 224,
+      "country": "USA",
+      "draft_year": "1994",
+      "draft_round": "1",
+      "draft_number": "10",
+      "from_year": 1994,
+      "to_year": 2007
+    },
+    "147": {
+      "player_id": 147,
+      "country": "USA",
+      "draft_year": "1994",
+      "draft_round": "1",
+      "draft_number": "13",
+      "from_year": 1994,
+      "to_year": 2006
+    },
+    "1740": {
+      "player_id": 1740,
+      "country": "USA",
+      "draft_year": "1998",
+      "draft_round": "2",
+      "draft_number": "32",
+      "from_year": 1998,
+      "to_year": 2013
+    },
+    "2736": {
+      "player_id": 2736,
+      "country": "United Kingdom",
+      "draft_year": "2004",
+      "draft_round": "1",
+      "draft_number": "7",
+      "from_year": 2004,
+      "to_year": 2018
+    },
+    "201936": {
+      "player_id": 201936,
+      "country": "USA",
+      "draft_year": "2009",
+      "draft_round": "1",
+      "draft_number": "4",
+      "from_year": 2009,
+      "to_year": 2018
+    },
+    "739": {
+      "player_id": 739,
+      "country": "USA",
+      "draft_year": "1995",
+      "draft_round": "1",
+      "draft_number": "4",
+      "from_year": 1995,
+      "to_year": 2012
+    },
+    "1710": {
+      "player_id": 1710,
+      "country": "USA",
+      "draft_year": "1998",
+      "draft_round": "1",
+      "draft_number": "2",
+      "from_year": 1998,
+      "to_year": 2011
+    },
+    "779": {
+      "player_id": 779,
+      "country": "USA",
+      "draft_year": "1989",
+      "draft_round": "1",
+      "draft_number": "4",
+      "from_year": 1989,
+      "to_year": 2003
+    },
+    "2037": {
+      "player_id": 2037,
+      "country": "USA",
+      "draft_year": "2000",
+      "draft_round": "1",
+      "draft_number": "8",
+      "from_year": 2000,
+      "to_year": 2019
+    },
+    "1630228": {
+      "player_id": 1630228,
+      "country": "DRC",
+      "draft_year": "2021",
+      "draft_round": "1",
+      "draft_number": "7",
+      "from_year": 2021,
+      "to_year": 2025
+    },
+    "2746": {
+      "player_id": 2746,
+      "country": "USA",
+      "draft_year": "2004",
+      "draft_round": "1",
+      "draft_number": "17",
+      "from_year": 2004,
+      "to_year": 2017
+    },
+    "1496": {
+      "player_id": 1496,
+      "country": "USA",
+      "draft_year": "1997",
+      "draft_round": "1",
+      "draft_number": "2",
+      "from_year": 1997,
+      "to_year": 2005
+    },
+    "2732": {
+      "player_id": 2732,
+      "country": "USA",
+      "draft_year": "2004",
+      "draft_round": "1",
+      "draft_number": "3",
+      "from_year": 2004,
+      "to_year": 2014
+    },
+    "2406": {
+      "player_id": 2406,
+      "country": "USA",
+      "draft_year": "2002",
+      "draft_round": "1",
+      "draft_number": "10",
+      "from_year": 2002,
+      "to_year": 2015
+    },
+    "1716": {
+      "player_id": 1716,
+      "country": "USA",
+      "draft_year": "1998",
+      "draft_round": "1",
+      "draft_number": "8",
+      "from_year": 1998,
+      "to_year": 2011
+    },
+    "202711": {
+      "player_id": 202711,
+      "country": "Croatia",
+      "draft_year": "2011",
+      "draft_round": "2",
+      "draft_number": "31",
+      "from_year": 2014,
+      "to_year": 2023
+    },
+    "202339": {
+      "player_id": 202339,
+      "country": "USA",
+      "draft_year": "2010",
+      "draft_round": "1",
+      "draft_number": "18",
+      "from_year": 2010,
+      "to_year": 2021
+    },
+    "2561": {
+      "player_id": 2561,
+      "country": "USA",
+      "draft_year": "2003",
+      "draft_round": "1",
+      "draft_number": "18",
+      "from_year": 2003,
+      "to_year": 2017
+    },
+    "210": {
+      "player_id": 210,
+      "country": "USA",
+      "draft_year": "1991",
+      "draft_round": "1",
+      "draft_number": "11",
+      "from_year": 1991,
+      "to_year": 2002
+    },
+    "101135": {
+      "player_id": 101135,
+      "country": "USA",
+      "draft_year": "2005",
+      "draft_round": "1",
+      "draft_number": "30",
+      "from_year": 2005,
+      "to_year": 2016
+    },
+    "1733": {
+      "player_id": 1733,
+      "country": "USA",
+      "draft_year": "1998",
+      "draft_round": "1",
+      "draft_number": "25",
+      "from_year": 1998,
+      "to_year": 2013
+    },
+    "1729": {
+      "player_id": 1729,
+      "country": "USA",
+      "draft_year": "1998",
+      "draft_round": "1",
+      "draft_number": "21",
+      "from_year": 1998,
+      "to_year": 2009
+    },
+    "200794": {
+      "player_id": 200794,
+      "country": "USA",
+      "draft_year": "2006",
+      "draft_round": "2",
+      "draft_number": "47",
+      "from_year": 2006,
+      "to_year": 2021
+    },
+    "1891": {
+      "player_id": 1891,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "10",
+      "from_year": 1999,
+      "to_year": 2017
+    },
+    "2572": {
+      "player_id": 2572,
+      "country": "USA",
+      "draft_year": "2003",
+      "draft_round": "1",
+      "draft_number": "29",
+      "from_year": 2003,
+      "to_year": 2012
+    },
+    "200745": {
+      "player_id": 200745,
+      "country": "Italy",
+      "draft_year": "2006",
+      "draft_round": "1",
+      "draft_number": "1",
+      "from_year": 2006,
+      "to_year": 2015
+    },
+    "1885": {
+      "player_id": 1885,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "4",
+      "from_year": 1999,
+      "to_year": 2013
+    },
+    "201609": {
+      "player_id": 201609,
+      "country": "Slovenia",
+      "draft_year": "2008",
+      "draft_round": "2",
+      "draft_number": "45",
+      "from_year": 2008,
+      "to_year": 2022
+    },
+    "1627763": {
+      "player_id": 1627763,
+      "country": "USA",
+      "draft_year": "2016",
+      "draft_round": "2",
+      "draft_number": "36",
+      "from_year": 2016,
+      "to_year": 2024
+    },
+    "896": {
+      "player_id": 896,
+      "country": "USA",
+      "draft_year": "1989",
+      "draft_round": "1",
+      "draft_number": "14",
+      "from_year": 1989,
+      "to_year": 2002
+    },
+    "1897": {
+      "player_id": 1897,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "16",
+      "from_year": 1999,
+      "to_year": 2016
+    },
+    "979": {
+      "player_id": 979,
+      "country": "USA",
+      "draft_year": "1996",
+      "draft_round": "1",
+      "draft_number": "17",
+      "from_year": 1996,
+      "to_year": 2013
+    },
+    "1887": {
+      "player_id": 1887,
+      "country": "USA",
+      "draft_year": "1999",
+      "draft_round": "1",
+      "draft_number": "6",
+      "from_year": 1999,
+      "to_year": 2008
+    },
+    "2590": {
+      "player_id": 2590,
+      "country": "USA",
+      "draft_year": "2003",
+      "draft_round": "2",
+      "draft_number": "47",
+      "from_year": 2003,
+      "to_year": 2015
+    },
+    "89": {
+      "player_id": 89,
+      "country": "USA",
+      "draft_year": "1993",
+      "draft_round": "2",
+      "draft_number": "37",
+      "from_year": 1993,
+      "to_year": 2005
+    },
+    "133": {
+      "player_id": 133,
+      "country": "USA",
+      "draft_year": "Undrafted",
+      "draft_round": "Undrafted",
+      "draft_number": "Undrafted",
+      "from_year": 1993,
+      "to_year": 2006
+    },
+    "980": {
+      "player_id": 980,
+      "country": "Lithuania",
+      "draft_year": "1996",
+      "draft_round": "1",
+      "draft_number": "20",
+      "from_year": 1997,
+      "to_year": 2010
+    },
+    "757": {
+      "player_id": 757,
+      "country": "USA",
+      "draft_year": "1995",
+      "draft_round": "1",
+      "draft_number": "7",
+      "from_year": 1995,
+      "to_year": 2007
+    },
+    "452": {
+      "player_id": 452,
+      "country": "USA",
+      "draft_year": "1993",
+      "draft_round": "1",
+      "draft_number": "8",
+      "from_year": 1993,
+      "to_year": 2005
+    },
+    "200755": {
+      "player_id": 200755,
+      "country": "USA",
+      "draft_year": "2006",
+      "draft_round": "1",
+      "draft_number": "11",
+      "from_year": 2006,
+      "to_year": 2020
+    },
+    "2210": {
+      "player_id": 2210,
+      "country": "USA",
+      "draft_year": "2001",
+      "draft_round": "1",
+      "draft_number": "13",
+      "from_year": 2001,
+      "to_year": 2017
+    },
+    "203933": {
+      "player_id": 203933,
+      "country": "USA",
+      "draft_year": "2014",
+      "draft_round": "1",
+      "draft_number": "14",
+      "from_year": 2014,
+      "to_year": 2023
+    },
+    "201943": {
+      "player_id": 201943,
+      "country": "USA",
+      "draft_year": "2009",
+      "draft_round": "1",
+      "draft_number": "10",
+      "from_year": 2009,
+      "to_year": 2017
+    },
+    "201163": {
+      "player_id": 201163,
+      "country": "USA",
+      "draft_year": "2007",
+      "draft_round": "1",
+      "draft_number": "23",
+      "from_year": 2007,
+      "to_year": 2019
+    }
+  },
+  "player_awards": {
+    "950": [
+      {
+        "description": "All-NBA",
+        "season": "1999-00",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2002-03",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1996-97",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1998-99",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "Olympic Bronze Medal",
+        "season": "2004",
+        "team": null
+      }
+    ],
+    "200746": [
+      {
+        "description": "All-NBA",
+        "season": "2010-11",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2013-14",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2014-15",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2015-16",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2017-18",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2006-07",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2011-12",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2015-16",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2018-19",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2015-16",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2017-18",
+        "team": null
+      }
+    ],
+    "202326": [
+      {
+        "description": "All-NBA",
+        "season": "2014-15",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2015-16",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2010-11",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2015-16",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2016-17",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2015-16",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2015-16",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2016-17",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2016",
+        "team": null
+      }
+    ],
+    "299": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1994-95",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2004-05",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1994-95",
+        "team": null
+      }
+    ],
+    "2072": [
+      {
+        "description": "All-NBA",
+        "season": "2003-04",
+        "team": "3"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2008",
+        "team": null
+      }
+    ],
+    "2405": [
+      {
+        "description": "All-NBA",
+        "season": "2004-05",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2006-07",
+        "team": "1"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2007-08",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2009-10",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2010-11",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2002-03",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "Olympic Bronze Medal",
+        "season": "2004",
+        "team": null
+      }
+    ],
+    "1712": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1998-99",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2003-04",
+        "team": null
+      }
+    ],
+    "949": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1996-97",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Sporting News Rookie of the Year",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2000",
+        "team": null
+      }
+    ],
+    "101145": [
+      {
+        "description": "NBA Most Improved Player",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2011-12",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      }
+    ],
+    "952": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1996-97",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2005-06",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      }
+    ],
+    "2755": [
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      }
+    ],
+    "208": [
+      {
+        "description": "All-NBA",
+        "season": "2003-04",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "1993-94",
+        "team": ""
+      },
+      {
+        "description": "NBA Champion",
+        "season": "1994-95",
+        "team": ""
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2007-08",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      }
+    ],
+    "2202": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2001-02",
+        "team": "1"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2001-02",
+        "team": null
+      }
+    ],
+    "275": [
+      {
+        "description": "NBA All-Star",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2000",
+        "team": null
+      }
+    ],
+    "1888": [
+      {
+        "description": "NBA All-Star",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2003-04",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      }
+    ],
+    "2397": [
+      {
+        "description": "All-NBA",
+        "season": "2003-04",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2005-06",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2006-07",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2007-08",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2008-09",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2002-03",
+        "team": "1"
+      },
+      {
+        "description": "Hall of Fame Inductee",
+        "season": "2016",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Sporting News Rookie of the Year",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "Olympic Appearance",
+        "season": "2000",
+        "team": null
+      },
+      {
+        "description": "Olympic Appearance",
+        "season": "2004",
+        "team": null
+      },
+      {
+        "description": "Olympic Appearance",
+        "season": "2008",
+        "team": null
+      }
+    ],
+    "978": [
+      {
+        "description": "All-NBA",
+        "season": "2003-04",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2010-11",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "Olympic Appearance",
+        "season": "2000",
+        "team": null
+      }
+    ],
+    "711": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1995-96",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1995-96",
+        "team": null
+      }
+    ],
+    "2216": [
+      {
+        "description": "All-NBA",
+        "season": "2010-11",
+        "team": "3"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Most Improved Player",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2014-15",
+        "team": null
+      }
+    ],
+    "1883": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1999-00",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "1999-00",
+        "team": null
+      }
+    ],
+    "84": [
+      {
+        "description": "All-Defensive Team",
+        "season": "1993-94",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1993-94",
+        "team": "1"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1992-93",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1993-94",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2000-01",
+        "team": null
+      }
+    ],
+    "101114": [
+      {
+        "description": "All-NBA",
+        "season": "2007-08",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2009-10",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2005-06",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2011-12",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2008",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2012",
+        "team": null
+      }
+    ],
+    "2430": [
+      {
+        "description": "All-NBA",
+        "season": "2007-08",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2002-03",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "Olympic Bronze Medal",
+        "season": "2004",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2008",
+        "team": null
+      }
+    ],
+    "255": [
+      {
+        "description": "All-NBA",
+        "season": "1995-96",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1996-97",
+        "team": "1"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1997-98",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1998-99",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1999-00",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1994-95",
+        "team": "1"
+      },
+      {
+        "description": "Hall of Fame Inductee",
+        "season": "2018",
+        "team": null
+      },
+      {
+        "description": "IBM Award",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1998-99",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA Sporting News Rookie of the Year",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA Sportsmanship",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Sportsmanship",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Sportsmanship",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "1996",
+        "team": null
+      }
+    ],
+    "1884": [
+      {
+        "description": "All-NBA",
+        "season": "2003-04",
+        "team": "3"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      }
+    ],
+    "2207": [
+      {
+        "description": "All-NBA",
+        "season": "2009-10",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2001-02",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2011-12",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2011-12",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      }
+    ],
+    "1894": [],
+    "469": [
+      {
+        "description": "All-NBA",
+        "season": "2002-03",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1993-94",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1994-95",
+        "team": null
+      }
+    ],
+    "1882": [
+      {
+        "description": "All-NBA",
+        "season": "2005-06",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1999-00",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Sporting News Rookie of the Year",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Sportsmanship",
+        "season": "2005-06",
+        "team": null
+      }
+    ],
+    "203506": [
+      {
+        "description": "All-Defensive Team",
+        "season": "2017-18",
+        "team": "1"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2017-18",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2013-14",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2018-19",
+        "team": null
+      },
+      {
+        "description": "NBA Most Improved Player",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2018-19",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2013-14",
+        "team": null
+      }
+    ],
+    "200750": [
+      {
+        "description": "All-NBA",
+        "season": "2008-09",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2009-10",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2006-07",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Sporting News Rookie of the Year",
+        "season": "2006-07",
+        "team": null
+      }
+    ],
+    "101122": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2005-06",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Most Improved Player",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      }
+    ],
+    "200752": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2006-07",
+        "team": "1"
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2006-07",
+        "team": null
+      }
+    ],
+    "714": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1995-96",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2006-07",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      }
+    ],
+    "2744": [
+      {
+        "description": "All-NBA",
+        "season": "2013-14",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2004-05",
+        "team": "2"
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2011-12",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      }
+    ],
+    "201569": [
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2016-17",
+        "team": ""
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2008-09",
+        "team": "2"
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2008-09",
+        "team": null
+      }
+    ],
+    "1749": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1998-99",
+        "team": "2"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2000-01",
+        "team": null
+      }
+    ],
+    "782": [
+      {
+        "description": "All-NBA",
+        "season": "1993-94",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1994-95",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1995-96",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1996-97",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1997-98",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1988-89",
+        "team": "1"
+      },
+      {
+        "description": "Hall of Fame Inductee",
+        "season": "2014",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1992-93",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1993-94",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star Most Valuable Player",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2001-02",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1990-91",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1988-89",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1988-89",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1988-89",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "1988-89",
+        "team": null
+      },
+      {
+        "description": "NBA Sporting News Rookie of the Year",
+        "season": "1988-89",
+        "team": null
+      },
+      {
+        "description": "Olympic Bronze Medal",
+        "season": "1988",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "1996",
+        "team": null
+      }
+    ],
+    "1890": [
+      {
+        "description": "All-NBA",
+        "season": "2004-05",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2005-06",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1999-00",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2010-11",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "Olympic Bronze Medal",
+        "season": "2004",
+        "team": null
+      }
+    ],
+    "1497": [
+      {
+        "description": "All-Defensive Team",
+        "season": "2004-05",
+        "team": "2"
+      },
+      {
+        "description": "All-Defensive Team",
+        "season": "2005-06",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2005-06",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2006-07",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2008-09",
+        "team": "3"
+      },
+      {
+        "description": "J. Walter Kennedy Citizenship",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2003-04",
+        "team": ""
+      },
+      {
+        "description": "NBA Finals Most Valuable Player",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA Sportsmanship",
+        "season": "2008-09",
+        "team": null
+      }
+    ],
+    "1536": [
+      {
+        "description": "NBA Champion",
+        "season": "2002-03",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      }
+    ],
+    "224": [
+      {
+        "description": "All-Defensive Team",
+        "season": "1997-98",
+        "team": "2"
+      },
+      {
+        "description": "All-Defensive Team",
+        "season": "1998-99",
+        "team": "2"
+      },
+      {
+        "description": "All-Defensive Team",
+        "season": "1999-00",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1999-00",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1994-95",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2001-02",
+        "team": null
+      }
+    ],
+    "147": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1994-95",
+        "team": "2"
+      },
+      {
+        "description": "NBA Most Improved Player",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      }
+    ],
+    "1740": [
+      {
+        "description": "NBA All-Star",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2012-13",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      }
+    ],
+    "2736": [
+      {
+        "description": "All-Defensive Team",
+        "season": "2011-12",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2004-05",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2011-12",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Sportsmanship",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "Olympic Appearance",
+        "season": "2012",
+        "team": null
+      }
+    ],
+    "201936": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2009-10",
+        "team": "1"
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "2009-10",
+        "team": null
+      }
+    ],
+    "739": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1995-96",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2000-01",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2003-04",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2001-02",
+        "team": null
+      }
+    ],
+    "1710": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1998-99",
+        "team": "1"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      }
+    ],
+    "779": [
+      {
+        "description": "All-NBA",
+        "season": "1996-97",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1997-98",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1989-90",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star Most Valuable Player",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "1999-00",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "1991-92",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1993-94",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1997-98",
+        "team": null
+      }
+    ],
+    "2037": [
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2015-16",
+        "team": null
+      }
+    ],
+    "1630228": [
+      {
+        "description": "NBA Champion",
+        "season": "2021-22",
+        "team": ""
+      }
+    ],
+    "2746": [
+      {
+        "description": "All-Defensive Team",
+        "season": "2009-10",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2004-05",
+        "team": "2"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2012-13",
+        "team": null
+      }
+    ],
+    "1496": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1997-98",
+        "team": "1"
+      }
+    ],
+    "2732": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2004-05",
+        "team": "1"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2004-05",
+        "team": null
+      }
+    ],
+    "2406": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2002-03",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2002-03",
+        "team": null
+      }
+    ],
+    "1716": [
+      {
+        "description": "All-Defensive Team",
+        "season": "2004-05",
+        "team": "1"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      }
+    ],
+    "202711": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2014-15",
+        "team": "2"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2018-19",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2020-21",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2014-15",
+        "team": null
+      }
+    ],
+    "202339": [
+      {
+        "description": "All-Defensive Team",
+        "season": "2018-19",
+        "team": "1"
+      },
+      {
+        "description": "All-Defensive Team",
+        "season": "2019-20",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2010-11",
+        "team": "2"
+      }
+    ],
+    "2561": [
+      {
+        "description": "NBA All-Star",
+        "season": "2007-08",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2016-17",
+        "team": ""
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2017-18",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      }
+    ],
+    "210": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1991-92",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA Sportsmanship",
+        "season": "1996-97",
+        "team": null
+      }
+    ],
+    "101135": [
+      {
+        "description": "All-NBA",
+        "season": "2012-13",
+        "team": "3"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2014-15",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      }
+    ],
+    "1733": [
+      {
+        "description": "NBA Player of the Week",
+        "season": "2008-09",
+        "team": null
+      }
+    ],
+    "1729": [],
+    "200794": [
+      {
+        "description": "All-Defensive Team",
+        "season": "2015-16",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2006-06",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "2006-07",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2015-16",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2016-17",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2015-16",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2018-19",
+        "team": null
+      }
+    ],
+    "1891": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1999-00",
+        "team": "2"
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2010-11",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2008-09",
+        "team": null
+      }
+    ],
+    "2572": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2003-04",
+        "team": "2"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      }
+    ],
+    "200745": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2006-07",
+        "team": "1"
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2006-07",
+        "team": null
+      }
+    ],
+    "1885": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1999-00",
+        "team": "1"
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2008-09",
+        "team": ""
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2009-10",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1999-00",
+        "team": null
+      },
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "Olympic Bronze Medal",
+        "season": "2004",
+        "team": null
+      }
+    ],
+    "201609": [
+      {
+        "description": "All-NBA",
+        "season": "2013-14",
+        "team": "3"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA Most Improved Player",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2011-12",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2013-14",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2017-18",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2017-18",
+        "team": null
+      }
+    ],
+    "1627763": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2016-17",
+        "team": "1"
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "2016-17",
+        "team": ""
+      },
+      {
+        "description": "NBA Sixth Man of the Year",
+        "season": "2022-23",
+        "team": null
+      }
+    ],
+    "896": [
+      {
+        "description": "All-NBA",
+        "season": "1991-92",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1992-93",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1996-97",
+        "team": "1"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1997-98",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1998-99",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1989-90",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1990-91",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1991-92",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1992-93",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1989-90",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1990-91",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1991-92",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1991-92",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2000",
+        "team": null
+      }
+    ],
+    "1897": [
+      {
+        "description": "J. Walter Kennedy Citizenship",
+        "season": "2010-11",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2009-10",
+        "team": ""
+      },
+      {
+        "description": "NBA Defensive Player of the Year",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "All-Defensive Team",
+        "season": "2002-03",
+        "team": "2"
+      },
+      {
+        "description": "All-Defensive Team",
+        "season": "2003-04",
+        "team": "1"
+      },
+      {
+        "description": "All-Defensive Team",
+        "season": "2005-06",
+        "team": "1"
+      },
+      {
+        "description": "All-Defensive Team",
+        "season": "2008-09",
+        "team": "2"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2003-04",
+        "team": "3"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1999-00",
+        "team": "2"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      }
+    ],
+    "979": [
+      {
+        "description": "All-NBA",
+        "season": "2001-02",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2002-03",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "2003-04",
+        "team": "2"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2005-06",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Most Improved Player",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Month",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      }
+    ],
+    "1887": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1999-00",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2001-02",
+        "team": null
+      }
+    ],
+    "2590": [
+      {
+        "description": "NBA All-Star",
+        "season": "2008-09",
+        "team": null
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2015-16",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2006-07",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2014-15",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2014-15",
+        "team": null
+      }
+    ],
+    "89": [
+      {
+        "description": "NBA All-Star",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1993-94",
+        "team": "2"
+      }
+    ],
+    "133": [],
+    "980": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1997-98",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      }
+    ],
+    "757": [
+      {
+        "description": "All-Rookie Team",
+        "season": "1995-96",
+        "team": "1"
+      },
+      {
+        "description": "NBA Rookie of the Year",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA Sporting News Rookie of the Year",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1995-96",
+        "team": null
+      }
+    ],
+    "452": [
+      {
+        "description": "All-NBA",
+        "season": "1996-97",
+        "team": "3"
+      },
+      {
+        "description": "All-NBA",
+        "season": "1997-98",
+        "team": "2"
+      },
+      {
+        "description": "All-Rookie Team",
+        "season": "1993-94",
+        "team": "1"
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1994-95",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1995-96",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1996-97",
+        "team": null
+      },
+      {
+        "description": "NBA All-Star",
+        "season": "1997-98",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "1993-94",
+        "team": null
+      },
+      {
+        "description": "Olympic Gold Medal",
+        "season": "2000",
+        "team": null
+      }
+    ],
+    "200755": [],
+    "2210": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2001-02",
+        "team": "2"
+      },
+      {
+        "description": "NBA Champion",
+        "season": "2015-16",
+        "team": ""
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2002-03",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2003-04",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2004-05",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2001-02",
+        "team": null
+      },
+      {
+        "description": "Olympic Bronze Medal",
+        "season": "2004",
+        "team": null
+      }
+    ],
+    "203933": [],
+    "201943": [
+      {
+        "description": "All-Rookie Team",
+        "season": "2009-10",
+        "team": "1"
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Player of the Week",
+        "season": "2012-13",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2009-10",
+        "team": null
+      },
+      {
+        "description": "NBA Rookie of the Month",
+        "season": "2009-10",
+        "team": null
+      }
+    ],
+    "201163": []
+  }
+}

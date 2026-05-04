@@ -1444,10 +1444,17 @@ def _merge_live_snapshots(
         try:
             year = int(season.split("-")[0])
         except (ValueError, IndexError):
-            continue
+            # Snapshot sans saison parsable (ex. "pool") : on ne pourra
+            # pas patcher team_seasons mais on peut quand même appliquer
+            # player_info / player_awards.
+            year = 0
 
-        # 1) Rosters → team_seasons
+        # 1) Rosters → team_seasons (ignoré si pas d'année valide)
+        if year and (snap.get("rosters") or {}):
+            pass  # bloc suivant exécuté normalement
         for abbr, plist in (snap.get("rosters") or {}).items():
+            if not year:
+                break
             if not isinstance(plist, list):
                 continue
             for entry in plist:
