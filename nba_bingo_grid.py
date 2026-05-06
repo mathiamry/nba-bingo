@@ -947,17 +947,36 @@ def _print_grid(grid: Grid) -> None:
 
 
 NUM_GAMES_TO_EXPORT = 20
-NBA_DATASET_DIR = "nba_dataset_extracted"
 
 
 if __name__ == "__main__":
-    if os.path.isdir(NBA_DATASET_DIR):
-        from nba_dataset_loader import load_real_dataset
-        categories, players = load_real_dataset(NBA_DATASET_DIR)
-        source = "réel (CSV 2024-25)"
-    else:
+    import argparse as _argparse
+
+    _parser = _argparse.ArgumentParser(description="Generate NBA Bingo game.json")
+    _parser.add_argument(
+        "--demo", action="store_true",
+        help="Use the built-in demo dataset instead of the NBA API"
+    )
+    _parser.add_argument(
+        "--cache-dir", default="nba_api_cache",
+        help="Directory for NBA API cache files (default: nba_api_cache)"
+    )
+    _parser.add_argument(
+        "--refresh", action="store_true",
+        help="Force re-fetch of all NBA API data, ignoring the cache"
+    )
+    _args = _parser.parse_args()
+
+    if _args.demo:
         categories, players = _demo_dataset()
         source = "démo (20 joueurs)"
+    else:
+        from nba_api_loader import load_dataset_from_api
+        categories, players = load_dataset_from_api(
+            cache_dir=_args.cache_dir,
+            force_refresh=_args.refresh,
+        )
+        source = "réel (NBA API)"
 
     # Pas de seed : chaque run produit des grilles différentes.
     rng = random.Random()
