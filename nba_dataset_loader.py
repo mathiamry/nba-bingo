@@ -17,9 +17,7 @@ disponible dans les deux fichiers.
 from __future__ import annotations
 
 import csv
-import json
 import os
-from dataclasses import replace
 from collections import defaultdict
 from typing import Optional
 
@@ -79,7 +77,7 @@ ENRICHMENT_BY_NAME: dict[str, dict] = {
     },
     "Anthony Davis": {
         "nationality": "USA",
-        "awards": frozenset({"All-Star", "All-NBA", "DPOY", "Olympic Gold 2024"}),
+        "awards": frozenset({"All-Star", "All-NBA", "Olympic Gold 2024"}),
         "draft_pick": 1, "draft_round": 1, "is_champion": True,
     },
     "Damian Lillard": {
@@ -1120,183 +1118,10 @@ def _aggregate_historical(rows: list[dict]) -> dict[int, dict]:
 # Chargement principal
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Overrides manuels (équipe, saison) pour patcher des cas que ni les
-# CSV ni le snapshot live nba_api ne couvrent. À étendre uniquement
-# pour des cas particuliers — pour la mise à jour normale, lance
-# `python fetch_live_data.py` qui rafraîchit les rosters de l'année.
-TEAM_SEASONS_OVERRIDES: dict[str, set[tuple[str, int]]] = {}
-
-
-# Mapping pays anglais (renvoyé par commonplayerinfo) → ISO alpha-3
-# (ce qu'on utilise dans Player.nationality + GridCell flag lookup).
-COUNTRY_TO_ISO: dict[str, str] = {
-    "USA": "USA",
-    "France": "FRA",
-    "Canada": "CAN",
-    "Spain": "ESP",
-    "Slovenia": "SVN",
-    "Serbia": "SRB",
-    "Cameroon": "CMR",
-    "Germany": "DEU",
-    "Greece": "GRC",
-    "Australia": "AUS",
-    "Lithuania": "LTU",
-    "Croatia": "HRV",
-    "Montenegro": "MNE",
-    "Turkey": "TUR",
-    "Finland": "FIN",
-    "Italy": "ITA",
-    "Argentina": "ARG",
-    "Bosnia and Herzegovina": "BIH",
-    "Brazil": "BRA",
-    "United Kingdom": "GBR",
-    "Great Britain": "GBR",
-    "England": "GBR",
-    "Nigeria": "NGA",
-    "Russia": "RUS",
-    "Sweden": "SWE",
-    "Dominican Republic": "DOM",
-    "Switzerland": "CHE",
-    "Bahamas": "BHS",
-    "Latvia": "LVA",
-    "Czech Republic": "CZE",
-    "Czechia": "CZE",
-    "Senegal": "SEN",
-    "South Sudan": "SSD",
-    "Sudan": "SDN",
-    "Ukraine": "UKR",
-    "Israel": "ISR",
-    "Belgium": "BEL",
-    "Netherlands": "NLD",
-    "China": "CHN",
-    "Japan": "JPN",
-    "Mexico": "MEX",
-    "Puerto Rico": "PRI",
-    "Jamaica": "JAM",
-    "Haiti": "HTI",
-    "Egypt": "EGY",
-    "Mali": "MLI",
-    "South Africa": "ZAF",
-    "DR Congo": "COD",
-    "Democratic Republic of the Congo": "COD",
-    "Republic of the Congo": "COG",
-    "Republic of Congo": "COG",
-    "Tunisia": "TUN",
-    "Angola": "AGO",
-    "Georgia": "GEO",
-    "New Zealand": "NZL",
-    "Austria": "AUT",
-    "Poland": "POL",
-    "Portugal": "PRT",
-    "Norway": "NOR",
-    "Denmark": "DNK",
-    "Ireland": "IRL",
-    "Iceland": "ISL",
-    "Estonia": "EST",
-    "North Macedonia": "MKD",
-    "Macedonia": "MKD",
-    "Romania": "ROU",
-    "Slovakia": "SVK",
-    "Bulgaria": "BGR",
-    "Hungary": "HUN",
-    "South Korea": "KOR",
-    "Kazakhstan": "KAZ",
-    "Iran": "IRN",
-    "Turkmenistan": "TKM",
-    "Lebanon": "LBN",
-    "Venezuela": "VEN",
-    "Colombia": "COL",
-    "Uruguay": "URY",
-    "Paraguay": "PRY",
-    "Chile": "CHL",
-    "Peru": "PER",
-    "Cuba": "CUB",
-    "Trinidad and Tobago": "TTO",
-}
-
-
-def _map_award_description(desc: str) -> Optional[str]:
-    """
-    Convertit une description d'award nba_api → notre code interne.
-    Exemples : "NBA Most Valuable Player" → "MVP", "All-NBA" → "All-NBA".
-    Retourne None si l'award n'est pas pertinent pour nos catégories.
-    """
-    if not desc:
-        return None
-    d = desc.lower()
-    if "most valuable player" in d:
-        if "finals" in d:
-            return "Finals MVP"
-        if "all-star" in d:
-            # NBA All-Star Game MVP — informatif mais pas le MVP régulier.
-            return None
-        return "MVP"
-    if "defensive player of the year" in d:
-        return "DPOY"
-    if "rookie of the year" in d:
-        return "ROY"
-    if "sixth man of the year" in d:
-        return "Sixth Man"
-    if "all-defensive" in d:
-        return "All-Defensive"
-    if "all-nba" in d:
-        return "All-NBA"
-    # "NBA All-Star" sans "Game MVP"
-    if "all-star" in d:
-        return "All-Star"
-    return None
-
-
-def _is_championship_award(desc: str) -> bool:
-    """Reconnaît les awards qui prouvent un titre NBA."""
-    if not desc:
-        return False
-    d = desc.lower()
-    return "nba champion" in d or "nba championship" in d
-
-
-def _load_live_snapshots() -> list[dict]:
-    """
-    Charge tous les snapshots `live_*.json` produits par fetch_live_data.py.
-    Permet d'avoir les rosters de la saison en cours alors que les CSV
-    s'arrêtent à 2024-25.
-    """
-    import glob
-    snaps: list[dict] = []
-    pattern = os.path.join(
-        os.path.dirname(__file__) or ".",
-        "nba_dataset_extracted",
-        "live_*.json",
-    )
-    for path in sorted(glob.glob(pattern)):
-        try:
-            with open(path, encoding="utf-8") as f:
-                snaps.append(json.load(f))
-        except Exception:
-            continue
-    return snaps
-
-
-def _fame_score(p: Player) -> float:
-    """
-    Score de notoriété grossier pour ranger les joueurs du plus connu
-    au plus obscur. Utilisé pour filtrer le pool aux ~500 joueurs les
-    plus reconnaissables, en gardant naturellement quelques pièges
-    parmi les role players de bas de tier.
-    """
-    score = p.career_ppg
-    score += len(p.awards) * 5.0
-    score += min(len(p.seasons), 12) * 0.5
-    if p.is_champion:
-        score += 5.0
-    return score
-
-
 def load_real_dataset(
     csv_dir: str,
     hist_csv: Optional[str] = None,
     min_games: int = 15,
-    top_n: Optional[int] = 250,
 ) -> tuple[list[Category], list[Player]]:
     """
     Charge et fusionne les deux sources de données NBA.
@@ -1309,9 +1134,6 @@ def load_real_dataset(
                 présents uniquement dans le dataset live. Les joueurs
                 exclusivement dans le dataset historique doivent avoir
                 joué ≥ 150 matchs au total.
-    top_n     : si défini, on ne garde que les `top_n` joueurs les plus
-                "connus" (cf. _fame_score) pour éviter d'avoir trop de
-                role players obscurs dans le pool. None = tout garder.
     """
     if hist_csv is None:
         hist_csv = os.path.join(
@@ -1366,13 +1188,6 @@ def load_real_dataset(
             (l["team_seasons"] if l else set())
             | (h["team_seasons"] if h else set())
         )
-
-        # Patch manuel pour les transactions récentes (Seth Curry, etc.)
-        name_for_override = name_by_id.get(pid, "")
-        ts_override = TEAM_SEASONS_OVERRIDES.get(name_for_override)
-        if ts_override:
-            team_seasons = team_seasons | ts_override
-            teams = teams | {t for t, _ in ts_override}
         seasons = (
             (l["seasons"] if l else set()) | (h["seasons"] if h else set())
         )
@@ -1404,225 +1219,8 @@ def load_real_dataset(
             team_seasons=frozenset(team_seasons),
         ))
 
-    # Merge des snapshots live (rosters NBA actuels via fetch_live_data.py)
-    # avant le filtre top_n. Patch les team_seasons des joueurs déjà connus
-    # avec la saison en cours et ajoute les nouvelles transactions.
-    snapshots = _load_live_snapshots()
-    if snapshots:
-        players = _merge_live_snapshots(players, name_by_id, snapshots)
-
-    # Filtre vers les `top_n` joueurs les plus connus pour éviter d'avoir
-    # majoritairement des role players obscurs dans le pool.
-    if top_n is not None and len(players) > top_n:
-        players.sort(key=_fame_score, reverse=True)
-        players = players[:top_n]
-
     categories = _build_categories(players, nick_by_abbr)
     return categories, players
-
-
-def _merge_live_snapshots(
-    players: list[Player],
-    name_by_id: dict[int, str],
-    snapshots: list[dict],
-) -> list[Player]:
-    """
-    Patche les Player avec ce que nba_api a remonté :
-    - rosters → team_seasons / teams / seasons
-    - player_info → nationality (ISO alpha-3) + draft_pick + draft_round
-    - player_awards → awards officiels (MVP, All-Star, DPOY…) +
-      éventuellement is_champion si "NBA Champion" est listé.
-
-    Les rookies pas dans nos CSV sont ajoutés en minimal — ils seront
-    généralement écartés par le filtre top_n vu qu'ils ont 0 stat de
-    carrière agrégée.
-    """
-    by_id: dict[int, Player] = {p.id: p for p in players}
-
-    for snap in snapshots:
-        season = snap.get("season", "")
-        try:
-            year = int(season.split("-")[0])
-        except (ValueError, IndexError):
-            # Snapshot sans saison parsable (ex. "pool") : on ne pourra
-            # pas patcher team_seasons mais on peut quand même appliquer
-            # player_info / player_awards.
-            year = 0
-
-        # 1) Rosters → team_seasons (ignoré si pas d'année valide)
-        if year and (snap.get("rosters") or {}):
-            pass  # bloc suivant exécuté normalement
-        for abbr, plist in (snap.get("rosters") or {}).items():
-            if not year:
-                break
-            if not isinstance(plist, list):
-                continue
-            for entry in plist:
-                pid = entry.get("player_id")
-                if not isinstance(pid, int):
-                    continue
-                if pid in by_id:
-                    p = by_id[pid]
-                    if (abbr, year) in p.team_seasons:
-                        continue
-                    by_id[pid] = replace(
-                        p,
-                        teams=frozenset(p.teams | {abbr}),
-                        seasons=frozenset(p.seasons | {year}),
-                        team_seasons=frozenset(p.team_seasons | {(abbr, year)}),
-                    )
-                else:
-                    name = entry.get("name") or name_by_id.get(pid, f"Player {pid}")
-                    by_id[pid] = Player(
-                        id=pid,
-                        name=name,
-                        teams=frozenset({abbr}),
-                        nationality="",
-                        awards=frozenset(),
-                        draft_pick=None,
-                        draft_round=None,
-                        career_ppg=0.0,
-                        career_rpg=0.0,
-                        career_apg=0.0,
-                        seasons=frozenset({year}),
-                        is_champion=False,
-                        team_seasons=frozenset({(abbr, year)}),
-                    )
-
-        # 2) player_info → nationality + draft
-        for pid_str, info in (snap.get("player_info") or {}).items():
-            try:
-                pid = int(pid_str)
-            except ValueError:
-                continue
-            if pid not in by_id:
-                continue
-            p = by_id[pid]
-
-            country = (info.get("country") or "").strip()
-            new_nat = COUNTRY_TO_ISO.get(country, p.nationality)
-
-            new_pick = p.draft_pick
-            new_round = p.draft_round
-            try:
-                dnum = info.get("draft_number")
-                if dnum and str(dnum).strip() not in ("", "0", "Undrafted"):
-                    new_pick = int(dnum)
-                drnd = info.get("draft_round")
-                if drnd and str(drnd).strip() not in ("", "0", "Undrafted"):
-                    new_round = int(drnd)
-            except (ValueError, TypeError):
-                pass
-
-            if (
-                new_nat != p.nationality
-                or new_pick != p.draft_pick
-                or new_round != p.draft_round
-            ):
-                by_id[pid] = replace(
-                    p,
-                    nationality=new_nat,
-                    draft_pick=new_pick,
-                    draft_round=new_round,
-                )
-
-        # 3) player_awards → awards + is_champion
-        for pid_str, awards_list in (snap.get("player_awards") or {}).items():
-            try:
-                pid = int(pid_str)
-            except ValueError:
-                continue
-            if pid not in by_id:
-                continue
-            p = by_id[pid]
-            new_awards = set(p.awards)
-            new_is_champion = p.is_champion
-            for award in (awards_list or []):
-                desc = (award or {}).get("description", "")
-                mapped = _map_award_description(desc)
-                if mapped:
-                    new_awards.add(mapped)
-                if _is_championship_award(desc):
-                    new_is_champion = True
-            new_awards_frozen = frozenset(new_awards)
-            if new_awards_frozen != p.awards or new_is_champion != p.is_champion:
-                by_id[pid] = replace(
-                    p,
-                    awards=new_awards_frozen,
-                    is_champion=new_is_champion,
-                )
-
-        # 4bis) player_career_stats → override career_ppg / career_rpg /
-        # career_apg avec les totaux nba.com (élimine le gap 2023-24 des
-        # CSVs et corrige les averages biaisés des actifs comme CP3, Klay,
-        # Boogie qui ont des saisons manquantes côté CSV).
-        for pid_str, totals in (snap.get("player_career_stats") or {}).items():
-            try:
-                pid = int(pid_str)
-            except ValueError:
-                continue
-            if pid not in by_id:
-                continue
-            p = by_id[pid]
-            try:
-                gp = int(totals.get("gp") or 0)
-                pts = int(totals.get("pts") or 0)
-                reb = int(totals.get("reb") or 0)
-                ast = int(totals.get("ast") or 0)
-            except (ValueError, TypeError):
-                continue
-            if gp <= 0:
-                continue
-            new_ppg = pts / gp
-            new_rpg = reb / gp
-            new_apg = ast / gp
-            if (
-                abs(new_ppg - p.career_ppg) > 0.05
-                or abs(new_rpg - p.career_rpg) > 0.05
-                or abs(new_apg - p.career_apg) > 0.05
-            ):
-                by_id[pid] = replace(
-                    p,
-                    career_ppg=new_ppg,
-                    career_rpg=new_rpg,
-                    career_apg=new_apg,
-                )
-
-        # 4) player_team_seasons → patch teams + team_seasons + seasons
-        # (de enrich_career_teams.py — reconstruit l'historique d'équipes
-        # via playercareerstats, plus précis que les CSV)
-        for pid_str, ts_list in (snap.get("player_team_seasons") or {}).items():
-            try:
-                pid = int(pid_str)
-            except ValueError:
-                continue
-            if pid not in by_id:
-                continue
-            p = by_id[pid]
-            new_team_seasons = set(p.team_seasons)
-            new_teams = set(p.teams)
-            new_seasons = set(p.seasons)
-            for entry in (ts_list or []):
-                if not isinstance(entry, list) or len(entry) != 2:
-                    continue
-                abbr, year = entry[0], entry[1]
-                if not abbr or not isinstance(year, int):
-                    continue
-                new_team_seasons.add((abbr, year))
-                new_teams.add(abbr)
-                new_seasons.add(year)
-            if (
-                len(new_team_seasons) != len(p.team_seasons)
-                or len(new_teams) != len(p.teams)
-            ):
-                by_id[pid] = replace(
-                    p,
-                    teams=frozenset(new_teams),
-                    team_seasons=frozenset(new_team_seasons),
-                    seasons=frozenset(new_seasons),
-                )
-
-    return list(by_id.values())
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1649,11 +1247,8 @@ def _build_categories(
         ))
 
     # ── NATIONALITY ───────────────────────────────────────────────────────────
-    # USA exclu — trop facile vu que ~70% des joueurs NBA sont US.
     nats_present = {p.nationality for p in players if p.nationality}
     for nat in sorted(nats_present):
-        if nat == "USA":
-            continue
         if nat not in NAT_LABELS:
             continue
         cats.append(Category(
@@ -1666,15 +1261,17 @@ def _build_categories(
 
     # ── AWARD ─────────────────────────────────────────────────────────────────
     award_defs = [
-        ("award_mvp",        "MVP",          2, "MVP"),
-        ("award_finals_mvp", "Finals MVP",   3, "Finals MVP"),
-        ("award_dpoy",       "DPOY",         3, "DPOY"),
-        ("award_roy",        "ROY",          3, "ROY"),
-        ("award_6moy",       "Sixth Man",    4, "Sixth Man"),
-        ("award_all_star",   "All-Star",     1, "All-Star"),
-        ("award_all_nba",    "All-NBA",      2, "All-NBA"),
-        ("award_olympic_gold_2024",   "Or JO 2024",     3, "Olympic Gold 2024"),
-        ("award_olympic_silver_fra",  "Argent JO 2024", 4, "Olympic Silver 2024"),
+        ("award_mvp",        "MVP",              2, "MVP"),
+        ("award_finals_mvp", "Finals MVP",        3, "Finals MVP"),
+        ("award_dpoy",       "DPOY",              3, "DPOY"),
+        ("award_roy",        "Rookie of the Year", 3, "ROY"),
+        ("award_6moy",       "Sixth Man",         4, "Sixth Man"),
+        ("award_all_star",   "All-Star",          1, "All-Star"),
+        ("award_all_nba",    "All-NBA",           2, "All-NBA"),
+        ("award_olympic_gold_2024",   "Champion olympique 2024",          3,
+         "Olympic Gold 2024"),
+        ("award_olympic_silver_fra",  "Médaille argent Paris 2024 (France)", 4,
+         "Olympic Silver 2024"),
     ]
     for cid, label, diff, key in award_defs:
         cats.append(Category(
@@ -1684,25 +1281,25 @@ def _build_categories(
 
     # ── DRAFT ─────────────────────────────────────────────────────────────────
     cats.extend([
-        Category("draft_pick_1", "Draft #1", Axis.DRAFT, 3,
+        Category("draft_pick_1", "1er choix de draft", Axis.DRAFT, 3,
                  lambda p: p.draft_pick == 1),
-        Category("draft_top_3", "Top 3 draft", Axis.DRAFT, 2,
+        Category("draft_top_3", "Top 3 de draft", Axis.DRAFT, 2,
                  lambda p: p.draft_pick is not None and p.draft_pick <= 3),
-        Category("draft_round_2", "2e tour de draft", Axis.DRAFT, 4,
+        Category("draft_round_2", "Choix du 2e tour", Axis.DRAFT, 4,
                  lambda p: p.draft_round == 2),
     ])
 
-    # ── STAT (moyennes de carrière) ────────────────────────────────────────────
+    # ── STAT (career averages) ────────────────────────────────────────────────
     cats.extend([
-        Category("stat_20_ppg", "20+ PPG", Axis.STAT, 2,
+        Category("stat_20_ppg", "20+ PPG (career avg)", Axis.STAT, 2,
                  lambda p: p.career_ppg >= 20.0),
-        Category("stat_25_ppg", "25+ PPG", Axis.STAT, 3,
+        Category("stat_25_ppg", "25+ PPG (career avg)", Axis.STAT, 3,
                  lambda p: p.career_ppg >= 25.0),
-        Category("stat_30_ppg", "30+ PPG", Axis.STAT, 5,
+        Category("stat_30_ppg", "30+ PPG (career avg)", Axis.STAT, 5,
                  lambda p: p.career_ppg >= 30.0),
-        Category("stat_10_rpg", "10+ RPG", Axis.STAT, 4,
+        Category("stat_10_rpg", "10+ RPG (career avg)", Axis.STAT, 4,
                  lambda p: p.career_rpg >= 10.0),
-        Category("stat_8_apg",  "8+ APG",  Axis.STAT, 4,
+        Category("stat_8_apg",  "8+ APG (career avg)",  Axis.STAT, 4,
                  lambda p: p.career_apg >= 8.0),
     ])
 
@@ -1710,23 +1307,23 @@ def _build_categories(
     cats.extend([
         Category("career_champion", "Champion NBA", Axis.CAREER, 2,
                  lambda p: p.is_champion),
-        Category("career_one_team", "1 seule franchise",
+        Category("career_one_team", "Une seule franchise (carrière)",
                  Axis.CAREER, 3,
                  lambda p: len(p.teams) == 1),
-        Category("career_4plus_teams", "4+ franchises",
+        Category("career_4plus_teams", "Joué pour 4+ franchises",
                  Axis.CAREER, 2,
                  lambda p: len(p.teams) >= 4),
     ])
 
     # ── ERA ───────────────────────────────────────────────────────────────────
     cats.extend([
-        Category("era_1990s", "Années 90", Axis.ERA, 3,
+        Category("era_1990s", "Actif dans les années 1990", Axis.ERA, 3,
                  lambda p: any(s < 2000 for s in p.seasons)),
-        Category("era_2000s", "Années 2000", Axis.ERA, 2,
+        Category("era_2000s", "Actif dans les années 2000", Axis.ERA, 2,
                  lambda p: any(2000 <= s < 2010 for s in p.seasons)),
-        Category("era_2010s", "Années 2010", Axis.ERA, 1,
+        Category("era_2010s", "Actif dans les années 2010", Axis.ERA, 1,
                  lambda p: any(2010 <= s < 2020 for s in p.seasons)),
-        Category("era_2020s", "Années 2020", Axis.ERA, 1,
+        Category("era_2020s", "Actif dans les années 2020", Axis.ERA, 1,
                  lambda p: any(s >= 2020 for s in p.seasons)),
     ])
 
@@ -1740,7 +1337,7 @@ def _build_categories(
             continue
         cats.append(Category(
             id=f"teammate_{target.id}",
-            label=f"Joué avec {star_name}",
+            label=f"A joué avec {star_name}",
             axis=Axis.TEAMMATE,
             difficulty=3,
             predicate=lambda p, t=target.team_seasons, tid=target.id:
@@ -1750,49 +1347,59 @@ def _build_categories(
     # ── COMBOS (catégories composées) ─────────────────────────────────────────
     # ~3-8 joueurs par catégorie — difficulté 4-5.
     cats.extend([
-        Category("combo_mvp_dpoy", "MVP + DPOY", Axis.AWARD, 5,
+        # Jordan, Robinson, Garnett, Giannis, Olajuwon
+        Category("combo_mvp_dpoy", "MVP et DPOY", Axis.AWARD, 5,
                  lambda p: "MVP" in p.awards and "DPOY" in p.awards),
 
+        # Shaq, Tim Duncan, LeBron, Robinson, Olajuwon
         Category("combo_pick1_mvp_champ",
-                 "Draft #1 + MVP + champion", Axis.AWARD, 5,
+                 "Draft #1, MVP et Champion NBA", Axis.AWARD, 5,
                  lambda p: (p.draft_pick == 1
                             and "MVP" in p.awards
                             and p.is_champion)),
 
+        # Jordan, Olajuwon, Giannis, Kawhi
         Category("combo_finals_mvp_dpoy",
-                 "Finals MVP + DPOY", Axis.AWARD, 5,
+                 "Finals MVP et DPOY", Axis.AWARD, 5,
                  lambda p: ("Finals MVP" in p.awards
                             and "DPOY" in p.awards)),
 
+        # Jordan, Magic (hors dataset), LeBron, Shaq, Duncan, Jokić, Giannis, Curry
         Category("combo_mvp_finals_mvp_champ",
-                 "MVP + Finals MVP + champion", Axis.AWARD, 4,
+                 "MVP, Finals MVP et Champion", Axis.AWARD, 4,
                  lambda p: ("MVP" in p.awards
                             and "Finals MVP" in p.awards
                             and p.is_champion)),
 
+        # LeBron, Durant, Andrew Wiggins, Shaq, Pau Gasol, Vince Carter...
         Category("combo_roy_champ",
-                 "ROY + champion", Axis.AWARD, 4,
+                 "ROY et Champion NBA", Axis.AWARD, 4,
                  lambda p: "ROY" in p.awards and p.is_champion),
 
+        # Jokić, Draymond, Ginobili, Marc Gasol, Middleton, Patty Mills…
         Category("combo_r2_champ",
-                 "2e tour + champion", Axis.DRAFT, 3,
+                 "Choix 2e tour + Champion NBA", Axis.DRAFT, 3,
                  lambda p: p.draft_round == 2 and p.is_champion),
 
+        # LeBron, Curry, Durant, Tatum, Jrue, Davis, Caruso, White…
         Category("combo_olympic24_champ",
-                 "Or JO 2024 + champion", Axis.AWARD, 4,
+                 "Champion olympique 2024 et Champion NBA", Axis.AWARD, 4,
                  lambda p: ("Olympic Gold 2024" in p.awards
                             and p.is_champion)),
 
+        # Russell Westbrook, Luka, Trae Young, Haliburton…
         Category("combo_ppg20_apg8",
-                 "20+ PPG et 8+ AST", Axis.STAT, 4,
+                 "20+ PPG & 8+ APG (career avg)", Axis.STAT, 4,
                  lambda p: p.career_ppg >= 20.0 and p.career_apg >= 8.0),
 
+        # Jokić, Sabonis…
         Category("combo_rpg10_apg5",
-                 "10+ REB et 5+ AST", Axis.STAT, 5,
+                 "10+ RPG & 5+ APG (career avg)", Axis.STAT, 5,
                  lambda p: p.career_rpg >= 10.0 and p.career_apg >= 5.0),
 
+        # Jokić, Draymond, Ginobili, Marc Gasol, Isaiah Thomas, Brunson…
         Category("combo_r2_allstar",
-                 "2e tour + All-Star", Axis.DRAFT, 3,
+                 "Choix 2e tour + All-Star", Axis.DRAFT, 3,
                  lambda p: p.draft_round == 2 and "All-Star" in p.awards),
     ])
 

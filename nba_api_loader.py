@@ -264,7 +264,10 @@ def load_dataset_from_api(
             )
         except Exception as exc:
             error_count += 1
-            print(f"  ⚠  [{i + 1}/{total}] {full_name}: {exc}")
+            try:
+                print(f"  [WARN] [{i + 1}/{total}] {full_name}: {exc}")
+            except Exception:
+                print(f"  [WARN] [{i + 1}/{total}] player id {player_id}: (encoding error in name)")
             continue
 
         if from_cache:
@@ -272,7 +275,7 @@ def load_dataset_from_api(
         else:
             fetched_count += 1
             if fetched_count % 100 == 0:
-                print(f"  … fetched {fetched_count} players from API so far")
+                print(f"  ... fetched {fetched_count} players from API so far")
 
         player = _build_player(player_id, full_name, data)
         if player is None:
