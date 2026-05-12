@@ -95,7 +95,7 @@ onBeforeUnmount(() => {
       @click="navigate('/')"
     >
       <h1
-        class="text-2xl sm:text-3xl font-extrabold tracking-[0.25em] uppercase"
+        class="text-3xl sm:text-4xl font-bebas tracking-widest uppercase"
         style="text-shadow: 0 2px 8px rgba(0,0,0,0.35);"
       >NBA BINGO</h1>
     </header>
@@ -117,14 +117,16 @@ onBeforeUnmount(() => {
 
     <!-- SOLO -->
     <template v-else-if="route.name === 'solo'">
+      <!-- Sous-banner fin (style FB "Play Football Games at...") :
+           padding réduit + couleur unie au lieu du gradient pour faire
+           moins épais et plus net visuellement. -->
       <div
-        class="w-full py-2 text-center text-xs sm:text-sm font-medium tracking-wide border-b border-white/10"
-        style="background: linear-gradient(to right, #3b3aff, #3533d6);"
+        class="w-full py-1 sm:py-1.5 text-center text-xs sm:text-sm font-medium tracking-wide bg-bingo-banner"
       >
         Mode solo — {{ rules.secondsPerTurn }}s par tour, grille parfaite : {{ rules.totalPerfectScore }} pts.
       </div>
 
-      <main class="w-full max-w-md mt-2 flex flex-col gap-2">
+      <main class="w-full max-w-lg mt-2 flex flex-col gap-2">
         <!-- StatusBanner edge-to-edge en phase terminée -->
         <StatusBanner
           v-if="isEnded"
@@ -145,14 +147,16 @@ onBeforeUnmount(() => {
           @skip="game.skipPlayer()"
         />
 
+        <!--
+          Grille style Football Bingo : edge-to-edge, mini-gap (gap-px)
+          entre les cases. Aspect 4/4.6 (≈ 1:1.15) au lieu de aspect-
+          square : chaque case devient légèrement plus haute que large,
+          ce qui donne ~15% de surface en plus par case et fait respirer
+          les logos + labels longs (style FB).
+        -->
         <div
           v-if="cells.length === 16"
-          :class="[
-            'grid grid-cols-4 grid-rows-4 aspect-square mx-1',
-            isEnded
-              ? 'gap-2 sm:gap-3'
-              : 'rounded-2xl overflow-hidden bg-bingo-cellEmpty',
-          ]"
+          class="grid grid-cols-4 grid-rows-4 aspect-[4/4.6] gap-px bg-bingo-bg"
         >
           <GridCell
             v-for="(cell, i) in cells"

@@ -3,12 +3,29 @@
 @tailwind utilities;
 
 html, body, #app {
-  height: 100%;
-  background-color: #0d0d12;
+  min-height: 100%;
   color: #ffffff;
   font-family: 'Montserrat', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+  Fond aligné sur Football Bingo dark mode :
+  base #1e0d30, gradient discret vers magenta #b837c6 dans le coin
+  haut-droit. Direction (-200deg) et arrêt à 50% reproduisent leur
+  ambiance "purple sheen" sans être saturé. Posé sur html (background-
+  attachment: fixed) pour couvrir tout le viewport même si le contenu est
+  court.
+*/
+html {
+  background-color: #1e0d30;
+  background-image: linear-gradient(-200deg, #1e0d30 50%, #b837c6 180%);
+  background-attachment: fixed;
+}
+
+body, #app {
+  background-color: transparent;
 }
 
 body {

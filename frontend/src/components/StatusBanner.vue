@@ -33,11 +33,11 @@ const tone = computed(() => {
     <div class="flex flex-col">
       <span
         v-if="message"
-        class="text-2xl sm:text-3xl font-extrabold tracking-wide leading-none"
+        class="text-3xl sm:text-4xl font-bebas tracking-widest leading-none"
       >{{ message }}</span>
       <span
         v-else
-        class="text-2xl sm:text-3xl font-extrabold tabular-nums leading-none"
+        class="text-3xl sm:text-4xl font-bebas tabular-nums tracking-wide leading-none"
       >{{ placedCount }} <span class="opacity-60">/ {{ total }}</span></span>
       <span
         v-if="!ended"
@@ -47,7 +47,7 @@ const tone = computed(() => {
 
     <button
       v-if="ended"
-      class="text-xs sm:text-sm px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg bg-black/25 hover:bg-black/40 uppercase tracking-widest font-bold"
+      class="text-base sm:text-lg px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg bg-black/25 hover:bg-black/40 uppercase tracking-widest font-bebas"
       @click="$emit('restart')"
     >
       Rejouer

@@ -152,7 +152,7 @@ GRID_SIZE = 16
 # Règles de jeu — appliquées côté moteur de partie (frontend / backend),
 # pas dans le simulateur de faisabilité (qui modélise un joueur optimal).
 MAX_STRIKES = 2                  # affiché en feedback, ne termine plus la partie
-TOTAL_PERFECT_SCORE = 60         # score d'une grille parfaitement remplie
+TOTAL_PERFECT_SCORE = 48         # 48 = 16 × 3 → score entier propre par case
 SECONDS_PER_TURN = 10            # temps imparti par tour avant auto-skip
 
 # Une catégorie ne peut figurer dans une grille que si au moins ce nombre
@@ -603,25 +603,22 @@ def generate_balanced_grid(
 
 def _distribute_points(
     cells: list[Category], total: int = TOTAL_PERFECT_SCORE
-) -> list[int]:
+) -> list[float]:
     """
-    Répartit `total` points (60) entre les cases, proportionnellement à
-    leur difficulté, avec arrondi déterministe pour que la somme soit
-    exactement `total`. Une case D5 vaut donc plus qu'une case D1.
+    Répartit `total` points entre les cases avec un POIDS ÉGAL pour chaque
+    case (chaque case = total / N points). On garde des floats : avec 16
+    cases × 60 points, chaque case vaut 3.75. Le frontend formate à l'affi-
+    chage. La somme exacte reste `total` (pas d'arrondi qui drift).
+
+    Choix produit : la difficulté reste utilisée pour la SÉLECTION des
+    cases dans la grille (équilibre des axes / niveaux de difficulté), mais
+    pas pour le scoring. Une case D5 et une case D1 valent la même chose
+    en pts — réussir la D5 vaut juste mieux parce qu'elle est plus dure
+    à trouver, pas parce qu'elle "rapporte plus".
     """
-    weights = [c.difficulty for c in cells]
-    sum_w = sum(weights) or 1
-    raw = [total * w / sum_w for w in weights]
-    floored = [int(r) for r in raw]
-    remainder = total - sum(floored)
-    by_frac = sorted(
-        range(len(cells)),
-        key=lambda i: (raw[i] - floored[i], cells[i].difficulty),
-        reverse=True,
-    )
-    for i in by_frac[:remainder]:
-        floored[i] += 1
-    return floored
+    n = len(cells) or 1
+    per_cell = total / n
+    return [per_cell] * n
 
 
 def _build_game_dict(

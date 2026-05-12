@@ -32,6 +32,9 @@ const {
   rules,
   timerProgress,
   myScore,
+  myProvisionalScore,
+  myDisplayScore,
+  myRank,
   won,
   playerName,
   roomState,
@@ -42,6 +45,10 @@ const timeLeftSeconds = computed(() => Math.max(0, mp.timeLeftMs / 1000))
 
 const inputName = ref(playerName.value || '')
 const showCopied = ref(false)
+// Modal classement : visible quand l'utilisateur clique sur "Voir mon
+// classement". Disponible dès qu'il a fini sa propre grille (peu importe
+// les autres) — pas besoin d'attendre la phase ENDED globale.
+const showRanking = ref(false)
 
 onMounted(() => {
   if (mp.playerName) {
@@ -111,9 +118,17 @@ const reconnecting = computed(
 </script>
 
 <template>
-  <main class="w-full max-w-md px-3 mt-3 flex flex-col gap-3">
-    <!-- Bandeau room -->
-    <div class="bg-bingo-banner/40 border border-white/10 rounded-xl px-3 py-2 flex items-center gap-2">
+  <main class="w-full max-w-lg px-3 mt-3 flex flex-col gap-3">
+    <!--
+      Bandeau room : affiché UNIQUEMENT en lobby (pour partager le code/lien
+      d'invitation). Une fois la partie lancée ou terminée, ce bandeau
+      n'apporte plus rien et prend de la place utile sur mobile — on le
+      cache. La flèche retour reste accessible via un bouton compact.
+    -->
+    <div
+      v-if="serverPhase === 'lobby'"
+      class="bg-bingo-banner/40 border border-white/10 rounded-xl px-3 py-2 flex items-center gap-2"
+    >
       <button
         class="text-white/60 hover:text-white text-lg leading-none px-1"
         title="Quitter la room"
@@ -127,9 +142,17 @@ const reconnecting = computed(
         class="text-xs px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 uppercase tracking-wider font-semibold"
         @click="copyLink"
       >
-        {{ showCopied ? 'Copié ✓' : 'Lien' }}
+        {{ showCopied ? 'Copie ✓' : 'Lien' }}
       </button>
     </div>
+
+    <!-- Bouton retour discret pendant la partie / le recap -->
+    <button
+      v-else
+      class="self-start text-white/50 hover:text-white text-sm px-2 py-1 -ml-2"
+      title="Quitter la room"
+      @click="leave"
+    >← Quitter</button>
 
     <!-- Saisie du nom si vide -->
     <div v-if="!playerName" class="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col gap-2">
@@ -186,18 +209,34 @@ const reconnecting = computed(
           Participants ({{ players.length }})
         </div>
         <ul class="space-y-1.5">
-          <li v-for="p in players" :key="p.id" class="flex items-center gap-2 text-sm">
-            <span class="w-2 h-2 rounded-full bg-bingo-cell"></span>
+          <li
+            v-for="p in players"
+            :key="p.id"
+            class="flex items-center gap-2 text-sm"
+            :class="p.connected === false ? 'opacity-50' : ''"
+          >
+            <span
+              class="w-2 h-2 rounded-full"
+              :class="p.connected === false ? 'bg-yellow-400 animate-pulse' : 'bg-bingo-cell'"
+              :title="p.connected === false ? 'Déconnecté — peut revenir' : 'Connecté'"
+            ></span>
             <span class="font-semibold truncate">{{ p.name }}</span>
-            <span v-if="p.id === selfId" class="opacity-50 text-xs">(toi)</span>
-            <span v-if="p.id === mp.roomState?.hostId" class="ml-auto text-[10px] uppercase tracking-wider bg-bingo-cell/20 text-bingo-cell px-1.5 py-0.5 rounded">Host</span>
+            <span v-if="p.id === selfId" class="opacity-60 text-xs">(toi)</span>
+            <span
+              v-if="p.connected === false"
+              class="text-[10px] uppercase tracking-wider text-yellow-400/90"
+            >reconnexion…</span>
+            <span
+              v-if="p.id === mp.roomState?.hostId"
+              class="ml-auto text-[10px] uppercase tracking-wider bg-bingo-cell/20 text-bingo-cell px-1.5 py-0.5 rounded"
+            >Host</span>
           </li>
         </ul>
       </section>
 
       <button
         v-if="isHost"
-        class="w-full bg-bingo-cell text-bingo-textDark font-extrabold uppercase tracking-widest py-3 rounded-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-3 rounded-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-xl"
         :disabled="players.length === 0"
         @click="mp.start()"
       >Lancer la partie</button>
@@ -208,50 +247,80 @@ const reconnecting = computed(
 
     <!-- PLAYING -->
     <template v-if="serverPhase === 'playing'">
-      <!-- Joueur courant + timer perso (caché si on a fini) -->
-      <PlayerCard
-        v-if="!isDone"
-        class="-mx-3"
-        :player="currentPlayer"
-        :turn-index="turnIndex"
-        :total-turns="sequenceLength"
-        :time-left="timeLeftSeconds"
-        :timer-progress="timerProgress"
-        @skip="mp.skip()"
-      />
+      <!--
+        Joueur courant + timer perso. Bleed edge-to-edge sur mobile via
+        wrapper div : on NE passe PAS la classe directement à PlayerCard,
+        sinon sa racine cumule `w-full` (interne) + `w-[calc(...)]`
+        (externe) — deux déclarations `width` de spécificité égale, le
+        gagnant dépend de l'ordre dans le CSS généré par Tailwind JIT et
+        n'est pas garanti. Conséquence observée : la bande restait
+        ~24px trop courte sur certains builds.
+        Avec un wrapper qui porte seul `-mx-3 w-[calc(100%+1.5rem)]`,
+        plus de conflit ; PlayerCard `w-full` remplit ce wrapper élargi.
+      -->
+      <div v-if="!isDone" class="-mx-3 w-[calc(100%+1.5rem)]">
+        <PlayerCard
+          :player="currentPlayer"
+          :turn-index="turnIndex"
+          :total-turns="sequenceLength"
+          :time-left="timeLeftSeconds"
+          :timer-progress="timerProgress"
+          @skip="mp.skip()"
+        />
+      </div>
 
-      <!-- Tu as fini, on attend les autres -->
+      <!--
+        Tu as fini : on affiche ton score perso et un bouton qui ouvre le
+        classement complet (modal). Tu n'as PAS besoin d'attendre que les
+        autres aient fini pour voir où tu te situes — le bouton affiche
+        en live les scores figés des joueurs déjà finis et le statut "en
+        cours" pour les autres.
+      -->
       <div
         v-else
         class="bg-bingo-cell/10 border border-bingo-cell/40 rounded-2xl p-4 text-center"
       >
-        <div class="text-bingo-cell font-extrabold uppercase tracking-widest text-sm mb-1">
-          Tu as terminé !
+        <div class="text-bingo-cell font-bebas uppercase tracking-widest text-xl mb-2">
+          Tu as termine !
         </div>
+        <div class="flex flex-col items-center mb-3">
+          <span class="text-[10px] uppercase tracking-widest opacity-60">Ton score</span>
+          <span class="tabular-nums font-bebas text-bingo-cell text-5xl tracking-wide leading-none">{{ myScore }}</span>
+          <span class="text-[10px] opacity-50 mt-0.5">/ {{ rules.totalPerfectScore }}</span>
+        </div>
+        <button
+          class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-2.5 rounded-lg hover:brightness-110 text-base mb-2"
+          @click="showRanking = true"
+        >Voir mon classement</button>
         <div class="text-xs opacity-70">
-          En attente des autres joueurs… ({{ doneCount }} / {{ totalPlayers }} ont fini)
+          {{ doneCount }} / {{ totalPlayers }} ont fini
         </div>
       </div>
 
-      <div v-if="cells.length === 16" class="-mx-3 grid grid-cols-4 grid-rows-4 aspect-square rounded-2xl overflow-hidden bg-bingo-cellEmpty">
+      <!--
+        Grille style Football Bingo : edge-to-edge via -mx-3, mini-gap
+        gap-px qui laisse passer le bg de la page entre les cases (effet
+        "tuiles" séparées). Pas de radius wrapper, juste un fond purple
+        qui sert de séparateur fin entre les cases.
+      -->
+      <div v-if="cells.length === 16" class="-mx-3 w-[calc(100%+1.5rem)] grid grid-cols-4 grid-rows-4 aspect-[4/4.6] gap-px bg-bingo-bg">
         <GridCell
           v-for="(cell, i) in cells"
           :key="cell.id"
           :cell="cell"
           :state="cellStates[cell.id] || { status: 'empty', playerName: null, wasCorrect: null }"
           :index="i"
-          :reveal-errors="false"
+          :reveal-errors="isDone"
           :disabled="cellGridDisabled"
           @click="(id) => mp.place(id)"
         />
       </div>
 
-      <Leaderboard
-        :entries="leaderboard"
-        :self-id="selfId"
-        :reveal="false"
-        :total="rules.gridSize"
-      />
+      <!--
+        Leaderboard CACHÉ pendant la partie — on ne révèle les scores
+        des autres qu'au recap final, pour préserver le focus du joueur
+        sur sa propre grille.
+      -->
     </template>
 
     <!-- ENDED -->
@@ -264,14 +333,22 @@ const reconnecting = computed(
         @restart="isHost && mp.restart()"
       />
 
-      <Leaderboard
-        :entries="leaderboard"
-        :self-id="selfId"
-        :reveal="true"
-        :total="rules.gridSize"
-      />
+      <!--
+        Pas de Leaderboard inline ici : on libère l'espace écran pour la
+        grille (cases plus visibles). Le bouton "Voir le classement"
+        ouvre la modal — même UX que mid-game.
+      -->
+      <button
+        class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-3 rounded-xl hover:brightness-110 text-xl"
+        @click="showRanking = true"
+      >Voir le classement</button>
 
-      <div v-if="cells.length === 16" class="-mx-3 grid grid-cols-4 grid-rows-4 aspect-square gap-2 sm:gap-3 px-2">
+      <!--
+        Grille fin de partie : même layout que pendant le jeu (gap-px,
+        pas de radius). La couleur des cases (lime / rouge / vide) suffit
+        comme feedback, pas besoin d'introduire des gaps épais + radius.
+      -->
+      <div v-if="cells.length === 16" class="-mx-3 w-[calc(100%+1.5rem)] grid grid-cols-4 grid-rows-4 aspect-[4/4.6] gap-px bg-bingo-bg">
         <GridCell
           v-for="(cell, i) in cells"
           :key="cell.id"
@@ -286,10 +363,45 @@ const reconnecting = computed(
 
       <button
         v-if="isHost"
-        class="w-full bg-bingo-cell text-bingo-textDark font-extrabold uppercase tracking-widest py-3 rounded-xl hover:brightness-110"
+        class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-3 rounded-xl hover:brightness-110 text-xl"
         @click="mp.restart()"
-      >Rejouer (même room)</button>
+      >Rejouer (meme room)</button>
       <p v-else class="text-center text-sm opacity-60">En attente du host pour rejouer…</p>
     </template>
+
+    <!--
+      Modal Classement : visible quand `showRanking` est true. Affiche la
+      table (Time / Pld / Pts) pour tous les joueurs. Les joueurs déjà
+      finis montrent leurs scores réels figés ; les joueurs encore en
+      cours sont marqués "En cours" et triés en bas.
+      Backdrop avec blur, card centrée, fermeture par X ou click backdrop.
+    -->
+    <div
+      v-if="showRanking"
+      class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-6"
+      @click.self="showRanking = false"
+    >
+      <div class="w-full max-w-md bg-bingo-bg border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-cell-stamp">
+        <!-- Header modal -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <span class="font-bebas uppercase tracking-widest text-xl">Classement</span>
+          <button
+            class="text-white/60 hover:text-white text-2xl leading-none px-1 -mr-1"
+            title="Fermer"
+            @click="showRanking = false"
+          >×</button>
+        </div>
+        <Leaderboard
+          :entries="leaderboard"
+          :self-id="selfId"
+          :reveal="true"
+          :total="rules.gridSize"
+          class="border-0 rounded-none"
+        />
+        <div class="px-4 py-3 text-center text-xs opacity-60 border-t border-white/10">
+          {{ doneCount }} / {{ totalPlayers }} joueurs ont fini
+        </div>
+      </div>
+    </div>
   </main>
 </template>

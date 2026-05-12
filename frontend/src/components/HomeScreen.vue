@@ -63,7 +63,7 @@ function joinRoom() {
     </div>
 
     <button
-      class="w-full bg-bingo-cell text-bingo-textDark font-extrabold uppercase tracking-widest py-3.5 rounded-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-base"
+      class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-3.5 rounded-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-xl"
       :disabled="!trimmedName"
       @click="startSolo"
     >
@@ -72,11 +72,11 @@ function joinRoom() {
 
     <div class="grid grid-cols-1 gap-3">
       <button
-        class="w-full bg-bingo-header text-white font-bold uppercase tracking-wider py-3 rounded-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="w-full bg-bingo-header text-white font-bebas uppercase tracking-widest py-3 rounded-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-lg"
         :disabled="!trimmedName"
         @click="createRoom"
       >
-        Créer une room
+        Creer une room
       </button>
 
       <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col gap-2">
@@ -90,7 +90,7 @@ function joinRoom() {
             @keydown.enter="joinRoom"
           />
           <button
-            class="bg-bingo-cell text-bingo-textDark font-bold uppercase tracking-wider px-4 rounded-lg hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest px-4 rounded-lg hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-lg"
             :disabled="!trimmedName || !trimmedCode"
             @click="joinRoom"
           >

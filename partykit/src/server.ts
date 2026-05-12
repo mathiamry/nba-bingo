@@ -49,6 +49,14 @@ type GamesPool = {
 
 const POOL = gamesPool as GamesPool;
 
+// Combien de temps on garde le record d'un joueur après sa dernière
+// déconnexion. Un joueur qui change d'app, lock l'écran ou se reconnecte
+// dans cette fenêtre retrouve TOUT (host status, placements, score).
+// Au-delà, on considère qu'il a abandonné et on le retire (ce qui peut
+// libérer le slot host pour d'autres). 10 min couvre largement le cas
+// "je passe sur Slack 5 min" ou "le navigateur a tué la WS en background".
+const STALE_PLAYER_TTL_MS = 10 * 60 * 1000;
+
 type Status = "lobby" | "playing" | "ended";
 
 type Player = {
@@ -92,19 +100,37 @@ type LeaderboardEntry = {
   skipped: number;        // cases laissées vides (skip + timeout)
   done: boolean;
   correct: number;        // 0 tant que reveal=false
-  score: number;          // idem
+  score: number;          // idem (score réel = cases correctes uniquement)
+  // Score "provisoire" = somme des points des cases POSÉES (peu importe
+  // correct/faux). Visible en live pour tout le monde pendant la partie ;
+  // préserve le suspense (les cases fausses restent vertes jusqu'au reveal)
+  // tout en donnant un feedback de progression chiffré.
+  provisionalScore: number;
   completedAtMs: number;  // 0 si pas encore done
   durationMs: number;     // temps écoulé entre start et done (0 si pas done)
+  connected: boolean;     // false = en cours de reconnexion (ou parti)
 };
 
-function viewForRecipient(state: RoomState, recipientId: string) {
+// Le record stocké dans `state.players` n'a pas de flag `connected` —
+// il est calculé à la volée pour chaque destinataire dans la vue.
+type PlayerView = Player & { connected: boolean };
+
+function viewForRecipient(
+  state: RoomState,
+  recipientId: string,
+  connectedSessions: Set<string>,
+) {
   const reveal = state.status === "ended";
   const myTurn = state.playerTurnIndex[recipientId] ?? 0;
   const myEndsAt = state.playerTurnEndsAt[recipientId] ?? 0;
   const myDone = state.playerDone[recipientId] === true;
   const myPlacements = state.placements[recipientId] || [];
 
-  // Grille du destinataire (uniquement SES placements visibles)
+  // Grille du destinataire (uniquement SES placements visibles).
+  // Reveal des erreurs dès que le destinataire a fini OU partie globale
+  // terminée — chacun voit son verdict perso à l'instant où il finit, sans
+  // attendre les autres.
+  const myReveal = reveal || myDone;
   const cellStates: Record<string, CellView> = {};
   if (state.game) {
     for (const c of state.game.cells) {
@@ -113,7 +139,7 @@ function viewForRecipient(state: RoomState, recipientId: string) {
     for (const p of myPlacements) {
       if (p.cellId === null) continue;
       const visualStatus =
-        reveal && p.wasCorrect === false ? "wrong" : "filled";
+        myReveal && p.wasCorrect === false ? "wrong" : "filled";
       cellStates[p.cellId] = {
         status: visualStatus,
         playerName: state.game.sequence[p.turnIndex]?.name ?? null,
@@ -135,18 +161,32 @@ function viewForRecipient(state: RoomState, recipientId: string) {
     for (const c of state.game.cells) pointsByCell.set(c.id, c.points);
   }
 
-  // Leaderboard : progression de tous (placed = posées, done flag, score au reveal)
+  // Leaderboard : progression de tous.
+  // Politique de reveal :
+  //   - Joueur ENCORE EN COURS : on n'expose que `placed`, `skipped`,
+  //     `provisionalScore` (somme des points des cases posées, peu importe
+  //     correct/faux). Préserve le suspense.
+  //   - Joueur TERMINÉ (grille pleine ou séquence finie OU partie globale
+  //     terminée) : on expose `correct`, `score` (réel), `completedAtMs`,
+  //     `durationMs`. Tout le monde voit son score final se figer.
   const leaderboard: LeaderboardEntry[] = Object.values(state.players).map(
     (p) => {
       const places = state.placements[p.id] || [];
-      const placed = places.filter((pl) => pl.cellId !== null).length;
-      const skipped = places.filter((pl) => pl.cellId === null).length;
+      const placedCells = places.filter((pl) => pl.cellId !== null);
+      const placed = placedCells.length;
+      const skipped = places.length - placed;
       const correctPlaces = places.filter((pl) => pl.wasCorrect === true);
       const correct = correctPlaces.length;
       const score = correctPlaces.reduce(
         (s, pl) => s + (pointsByCell.get(pl.cellId!) ?? 0),
         0,
       );
+      const provisionalScore = placedCells.reduce(
+        (s, pl) => s + (pointsByCell.get(pl.cellId!) ?? 0),
+        0,
+      );
+      const entryDone = state.playerDone[p.id] === true;
+      const entryReveal = reveal || entryDone;
       const completedAtMs = state.playerCompletedAt[p.id] ?? 0;
       const durationMs =
         completedAtMs && state.startedAt
@@ -157,11 +197,13 @@ function viewForRecipient(state: RoomState, recipientId: string) {
         name: p.name,
         placed,
         skipped,
-        done: state.playerDone[p.id] === true,
-        correct: reveal ? correct : 0,
-        score: reveal ? score : 0,
-        completedAtMs: reveal ? completedAtMs : 0,
-        durationMs: reveal ? durationMs : 0,
+        done: entryDone,
+        correct: entryReveal ? correct : 0,
+        score: entryReveal ? score : 0,
+        provisionalScore,
+        completedAtMs: entryReveal ? completedAtMs : 0,
+        durationMs: entryReveal ? durationMs : 0,
+        connected: connectedSessions.has(p.id),
       };
     },
   );
@@ -177,9 +219,11 @@ function viewForRecipient(state: RoomState, recipientId: string) {
     isDone: myDone,
     doneCount,
     totalPlayers,
-    players: Object.values(state.players).sort(
-      (a, b) => a.joinedAt - b.joinedAt,
-    ),
+    players: Object.values(state.players)
+      .map(
+        (p): PlayerView => ({ ...p, connected: connectedSessions.has(p.id) }),
+      )
+      .sort((a, b) => a.joinedAt - b.joinedAt),
     cells: state.game?.cells ?? [],
     cellStates,
     sequenceLength: state.game?.sequence.length ?? 0,
@@ -202,6 +246,10 @@ export default class NbaBingoServer implements Party.Server {
   // (généré dans localStorage), pas par conn.id qui change à chaque WS.
   sessionByConn: Map<string, string> = new Map();
   connsBySession: Map<string, Set<string>> = new Map();
+  // Timers de cleanup TTL : armés quand la dernière connexion d'un joueur
+  // se ferme, désarmés à la reconnexion. Si jamais ils explosent, on
+  // retire vraiment le joueur (libère le slot host le cas échéant).
+  staleCleanupTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
 
   constructor(readonly room: Party.Room) {
     this.state = {
@@ -244,14 +292,15 @@ export default class NbaBingoServer implements Party.Server {
       this.broadcast();
       return;
     }
-    // Plus aucune connexion pour ce joueur :
-    // - en LOBBY on supprime (sinon liste polluée par des fantômes)
-    // - en PLAYING/ENDED on garde l'état pour permettre la reconnexion
-    if (this.state.status === "lobby") {
-      this.removePlayer(sessionId);
-    } else {
-      this.broadcast();
+    // Plus aucune connexion pour ce joueur. On garde son record (host
+    // status, placements, score…) intact PARTOUT (lobby, playing, ended)
+    // pour permettre une reconnexion propre — utile sur mobile où la
+    // WebSocket meurt dès qu'on switch d'app. Un timer TTL retire le
+    // joueur seulement s'il ne revient jamais.
+    if (this.state.players[sessionId]) {
+      this.scheduleStaleCleanup(sessionId);
     }
+    this.broadcast();
   }
 
   onMessage(raw: string, sender: Party.Connection) {
@@ -296,11 +345,14 @@ export default class NbaBingoServer implements Party.Server {
     }
     this.connsBySession.get(sessionId)!.add(conn.id);
 
+    // Le joueur revient avant l'expiration du TTL : on annule la suppression.
+    this.clearStaleCleanup(sessionId);
+
     const isExistingPlayer = !!this.state.players[sessionId];
 
     if (isExistingPlayer) {
-      // Reconnexion : on garde tout (placements, score, turn), juste le
-      // nom est éventuellement mis à jour.
+      // Reconnexion : on garde tout (host status, placements, score,
+      // turn), seul le nom peut être mis à jour.
       this.state.players[sessionId].name = name;
       this.broadcast();
       return;
@@ -338,6 +390,7 @@ export default class NbaBingoServer implements Party.Server {
   removePlayer(sessionId: string) {
     if (!this.state.players[sessionId]) return;
     this.clearPlayerTimer(sessionId);
+    this.clearStaleCleanup(sessionId);
     delete this.state.players[sessionId];
     delete this.state.placements[sessionId];
     delete this.state.playerTurnIndex[sessionId];
@@ -355,6 +408,30 @@ export default class NbaBingoServer implements Party.Server {
       return;
     }
     this.broadcast();
+  }
+
+  // ─── TTL cleanup (joueurs déconnectés) ─────────────────────────────────
+
+  scheduleStaleCleanup(sessionId: string) {
+    this.clearStaleCleanup(sessionId);
+    this.staleCleanupTimers.set(
+      sessionId,
+      setTimeout(() => {
+        this.staleCleanupTimers.delete(sessionId);
+        // Le joueur n'est jamais revenu — on libère le slot. removePlayer
+        // gère la réassignation host et le passage en endGame si tous les
+        // restants ont fini.
+        this.removePlayer(sessionId);
+      }, STALE_PLAYER_TTL_MS),
+    );
+  }
+
+  clearStaleCleanup(sessionId: string) {
+    const t = this.staleCleanupTimers.get(sessionId);
+    if (t) {
+      clearTimeout(t);
+      this.staleCleanupTimers.delete(sessionId);
+    }
   }
 
   // ─── Start / restart ───────────────────────────────────────────────────
@@ -515,7 +592,8 @@ export default class NbaBingoServer implements Party.Server {
 
   sendStateTo(conn: Party.Connection) {
     const sessionId = this.sessionOf(conn);
-    const view = viewForRecipient(this.state, sessionId);
+    const connectedSessions = new Set(this.connsBySession.keys());
+    const view = viewForRecipient(this.state, sessionId, connectedSessions);
     conn.send(JSON.stringify({ type: "state", state: view }));
   }
 

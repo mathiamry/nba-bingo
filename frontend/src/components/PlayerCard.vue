@@ -42,9 +42,13 @@ const timeDisplay = computed(() => Math.ceil(props.timeLeft))
 </script>
 
 <template>
+  <!--
+    Edge-to-edge flat band style Football Bingo : couleur unie indigo
+    (pas de gradient — FB n'en a pas, plus net visuellement). Pas de
+    radius, pas de mx — bandeau plein-largeur identique au header.
+  -->
   <div
-    class="w-full flex items-center gap-4 sm:gap-5 px-4 py-3 sm:px-5 sm:py-4 rounded-2xl mx-1"
-    style="background: linear-gradient(135deg, #3b3aff 0%, #5554ff 60%, #4443ef 100%);"
+    class="w-full flex items-center gap-4 sm:gap-5 px-4 py-3 sm:px-5 sm:py-4 bg-bingo-playerBand"
   >
 
     <!-- Timer circle: white disc + colour SVG arc -->
@@ -75,7 +79,7 @@ const timeDisplay = computed(() => Math.ceil(props.timeLeft))
         class="absolute rounded-full bg-white flex items-center justify-center ring-2 ring-white/30 shadow-inner"
         style="inset: 7px;"
       >
-        <span class="text-2xl sm:text-3xl font-extrabold text-gray-900 tabular-nums leading-none">
+        <span class="text-2xl sm:text-3xl font-bebas text-gray-900 tabular-nums leading-none tracking-wide">
           {{ player ? timeDisplay : '--' }}
         </span>
       </div>
@@ -86,27 +90,35 @@ const timeDisplay = computed(() => Math.ceil(props.timeLeft))
       <template v-if="player">
         <span
           v-if="firstName"
-          class="text-[11px] sm:text-xs uppercase tracking-[0.16em] font-semibold opacity-70 leading-none"
+          class="text-xs sm:text-sm uppercase tracking-widest font-bebas opacity-75 leading-none"
         >{{ firstName }}</span>
         <span
-          class="text-2xl sm:text-3xl font-extrabold uppercase leading-tight break-words tracking-[0.04em]"
+          class="text-3xl sm:text-4xl font-bebas uppercase leading-tight break-words tracking-wide"
           style="text-shadow: 0 1px 4px rgba(0,0,0,0.35)"
         >{{ lastName }}</span>
       </template>
       <span
         v-else
-        class="text-xl sm:text-2xl font-extrabold uppercase opacity-60 leading-tight"
+        class="text-2xl sm:text-3xl font-bebas uppercase opacity-60 leading-tight tracking-wider"
       >EN ATTENTE</span>
     </div>
 
-    <!-- Skip + remaining count — right-aligned tight block -->
+    <!--
+      Skip + remaining count : right-aligned tight block.
+      `touch-manipulation` désactive le délai 300ms iOS + le double-tap
+      zoom qui faisaient parfois "rater" un premier tap du bouton SKIP.
+      Padding élargi pour une hitbox confortable (>= 44×44 px Apple guideline).
+      `hover:opacity-80` retiré : sur iOS Safari le 1er tap déclenche
+      :hover (qui repaint l'élément), et le @click n'est exécuté qu'au
+      2e tap. Le feedback tactile est conservé via `active:opacity-60`.
+    -->
     <div class="flex flex-col items-end shrink-0 gap-1">
       <button
-        class="text-sm sm:text-base font-extrabold uppercase tracking-widest leading-none disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-80 transition-opacity"
+        class="touch-manipulation text-2xl sm:text-3xl font-bebas uppercase tracking-widest leading-none disabled:opacity-30 disabled:cursor-not-allowed active:opacity-60 transition-opacity px-3 py-2 -mr-1"
         :disabled="!player"
         @click="$emit('skip')"
-      >SKIP ▶︎</button>
-      <span class="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.12em] opacity-55 tabular-nums leading-none">
+      >SKIP</button>
+      <span class="text-sm sm:text-base font-bebas uppercase tracking-widest opacity-55 tabular-nums leading-none">
         {{ remaining }}&nbsp;LEFT
       </span>
     </div>

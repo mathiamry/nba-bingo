@@ -64,7 +64,7 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
 
         <!-- Saisie du nom -->
         <template v-if="editing">
-          <h2 class="text-xl font-extrabold mb-1 uppercase tracking-wider">
+          <h2 class="text-2xl font-bebas mb-1 uppercase tracking-widest">
             Comment tu t'appelles ?
           </h2>
           <p class="text-xs opacity-60 mb-5">On garde ton nom pour les prochaines parties.</p>
@@ -78,7 +78,7 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
           />
           <button
             :disabled="!inputName.trim()"
-            class="mt-4 w-full bg-bingo-cell text-bingo-textDark font-bold uppercase tracking-wider py-2.5 rounded-lg hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="mt-4 w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-2.5 rounded-lg hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-lg"
             @click="submitName"
           >
             Voir mon score
@@ -90,7 +90,7 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
           <div class="text-xs uppercase tracking-widest opacity-60 mb-1">
             {{ won ? 'Champion' : 'Joueur' }}
           </div>
-          <div class="text-2xl font-extrabold mb-5 flex items-center justify-center gap-2">
+          <div class="text-3xl font-bebas tracking-wider mb-5 flex items-center justify-center gap-2">
             <span class="truncate max-w-[200px]">{{ playerName }}</span>
             <button
               class="text-xs opacity-50 hover:opacity-100 underline"
@@ -102,7 +102,7 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
           </div>
 
           <div class="text-xs uppercase tracking-widest opacity-60 mb-1">Score</div>
-          <div class="text-7xl font-extrabold text-bingo-cell tabular-nums leading-none mb-1">
+          <div class="text-8xl font-bebas text-bingo-cell tabular-nums leading-none tracking-wide mb-1">
             {{ fmtScore }}
           </div>
           <div class="text-xs opacity-60 mb-6">
@@ -111,13 +111,13 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
 
           <div class="flex flex-col gap-2">
             <button
-              class="w-full bg-bingo-cell text-bingo-textDark font-bold uppercase tracking-wider py-2.5 rounded-lg hover:brightness-110"
+              class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-2.5 rounded-lg hover:brightness-110 text-xl"
               @click="$emit('restart')"
             >
               Rejouer
             </button>
             <button
-              class="w-full bg-white/10 text-white font-semibold uppercase tracking-wider py-2 rounded-lg hover:bg-white/20 text-xs"
+              class="w-full bg-white/10 text-white font-bebas uppercase tracking-widest py-2 rounded-lg hover:bg-white/20 text-base"
               @click="$emit('close')"
             >
               Voir la grille

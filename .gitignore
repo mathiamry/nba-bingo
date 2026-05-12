@@ -37,3 +37,6 @@ frontend/.env.production.local
 
 # PartyKit local
 partykit/.partykit/
+
+# Claude Code local config
+.claude/

@@ -100,6 +100,43 @@ export const useMultiplayerStore = defineStore('multiplayer', {
       const me = this.leaderboard.find((p) => p.id === this.selfId)
       return me?.score ?? 0
     },
+    // Score "live" pendant la partie : somme des points des cases que J'AI
+    // posées (correctes ou non — préservé via le mécanisme cellule verte
+    // jusqu'au reveal). À la fin / quand je suis fini, le serveur le
+    // remplace par le score réel.
+    myProvisionalScore(state) {
+      const me = this.leaderboard.find((p) => p.id === this.selfId)
+      return me?.provisionalScore ?? 0
+    },
+    // Score à afficher pour MOI : vrai score si j'ai fini, sinon score
+    // provisoire. Utilisé pour le pill score perso.
+    myDisplayScore(state) {
+      const me = this.leaderboard.find((p) => p.id === this.selfId)
+      if (!me) return 0
+      return me.done ? (me.score ?? 0) : (me.provisionalScore ?? 0)
+    },
+    // Classement "live" : trie tout le monde sur leur displayScore (réel si
+    // done, sinon provisoire). En cas d'égalité, les "done" passent devant
+    // (score figé), puis plus de cases, moins de skips, alphabétique.
+    liveLeaderboardSorted(state) {
+      const list = [...this.leaderboard]
+      return list.sort((a, b) => {
+        const sa = a.done ? (a.score ?? 0) : (a.provisionalScore ?? 0)
+        const sb = b.done ? (b.score ?? 0) : (b.provisionalScore ?? 0)
+        if (sb !== sa) return sb - sa
+        if (a.done !== b.done) return a.done ? -1 : 1
+        return (
+          (b.placed ?? 0) - (a.placed ?? 0) ||
+          (a.skipped ?? 0) - (b.skipped ?? 0) ||
+          a.name.localeCompare(b.name)
+        )
+      })
+    },
+    myRank(state) {
+      const list = this.liveLeaderboardSorted
+      const idx = list.findIndex((p) => p.id === this.selfId)
+      return idx === -1 ? 0 : idx + 1
+    },
   },
 
   actions: {
