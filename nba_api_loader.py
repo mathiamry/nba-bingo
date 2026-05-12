@@ -33,6 +33,7 @@ from nba_bingo_grid import Player, Category, Axis
 from nba_dataset_loader import (
     ENRICHMENT_BY_NAME,
     HISTORICAL_TEAM_NAMES,
+    MANUAL_NATIONALITY_OVERRIDES,
     _build_categories,
 )
 
@@ -211,11 +212,18 @@ def _build_player(player_id: int, full_name: str, data: dict) -> Optional[Player
     draft_pick = enrich.get("draft_pick", data.get("draft_pick"))
     draft_round = enrich.get("draft_round", data.get("draft_round"))
 
+    # Nationality priority: manual override > enrichment > "".
+    # Le manual override gagne sur l'enrichissement pour les cas comme
+    # Ben Gordon (NBA.com le classe USA, mais il représente la GBR).
+    nationality = MANUAL_NATIONALITY_OVERRIDES.get(
+        full_name, enrich.get("nationality", "")
+    )
+
     return Player(
         id=player_id,
         name=full_name,
         teams=frozenset(teams),
-        nationality=enrich.get("nationality", ""),
+        nationality=nationality,
         awards=enrich.get("awards", frozenset()),
         draft_pick=draft_pick,
         draft_round=draft_round,

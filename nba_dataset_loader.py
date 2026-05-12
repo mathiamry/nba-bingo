@@ -1162,6 +1162,16 @@ def _aggregate_historical(rows: list[dict]) -> dict[int, dict]:
 TEAM_SEASONS_OVERRIDES: dict[str, set[tuple[str, int]]] = {}
 
 
+# Overrides manuels de nationalité — appliqués APRÈS _merge_live_snapshots,
+# donc ils gagnent toujours sur ce que renvoie nba_api. Utile pour les
+# joueurs dont NBA.com ne reflète pas la nationalité sportive (équipe
+# nationale qu'ils représentent), p.ex. Ben Gordon né à Londres mais
+# classé "USA" côté NBA car élevé et drafté aux États-Unis.
+MANUAL_NATIONALITY_OVERRIDES: dict[str, str] = {
+    "Ben Gordon": "GBR",
+}
+
+
 # Mapping pays anglais (renvoyé par commonplayerinfo) → ISO alpha-3
 # (ce qu'on utilise dans Player.nationality + GridCell flag lookup).
 COUNTRY_TO_ISO: dict[str, str] = {
@@ -1445,6 +1455,17 @@ def load_real_dataset(
     snapshots = _load_live_snapshots()
     if snapshots:
         players = _merge_live_snapshots(players, name_by_id, snapshots)
+
+    # Force les overrides manuels de nationalité APRÈS la fusion live —
+    # nba_api écrase sinon nos enrichissements (cf. Ben Gordon → GBR).
+    if MANUAL_NATIONALITY_OVERRIDES:
+        players = [
+            replace(p, nationality=MANUAL_NATIONALITY_OVERRIDES[p.name])
+            if p.name in MANUAL_NATIONALITY_OVERRIDES
+            and p.nationality != MANUAL_NATIONALITY_OVERRIDES[p.name]
+            else p
+            for p in players
+        ]
 
     # Filtre vers les `top_n` joueurs les plus connus pour éviter d'avoir
     # majoritairement des role players obscurs dans le pool.
@@ -1730,17 +1751,22 @@ def _build_categories(
     ])
 
     # ── STAT (moyennes de carrière) ────────────────────────────────────────────
+    # On arrondit à une décimale avant comparaison pour matcher la convention
+    # d'affichage NBA.com / basketball-reference : Kobe = 33 643 pts / 1 346 GP
+    # = 24.994 PPG, universellement présenté comme "25.0". Sans l'arrondi,
+    # `>= 25.0` strict produit un faux négatif sur tous les joueurs dont la
+    # vraie moyenne tombe dans [X.95, X.00).
     cats.extend([
-        Category("stat_20_ppg", "20+ PPG", Axis.STAT, 2,
-                 lambda p: p.career_ppg >= 20.0),
-        Category("stat_25_ppg", "25+ PPG", Axis.STAT, 3,
-                 lambda p: p.career_ppg >= 25.0),
-        Category("stat_30_ppg", "30+ PPG", Axis.STAT, 5,
-                 lambda p: p.career_ppg >= 30.0),
-        Category("stat_10_rpg", "10+ RPG", Axis.STAT, 4,
-                 lambda p: p.career_rpg >= 10.0),
-        Category("stat_8_apg",  "8+ APG",  Axis.STAT, 4,
-                 lambda p: p.career_apg >= 8.0),
+        Category("stat_20_ppg", "20+ PPG en carrière", Axis.STAT, 2,
+                 lambda p: round(p.career_ppg, 1) >= 20.0),
+        Category("stat_25_ppg", "25+ PPG en carrière", Axis.STAT, 3,
+                 lambda p: round(p.career_ppg, 1) >= 25.0),
+        Category("stat_30_ppg", "30+ PPG en carrière", Axis.STAT, 5,
+                 lambda p: round(p.career_ppg, 1) >= 30.0),
+        Category("stat_10_rpg", "10+ RPG en carrière", Axis.STAT, 4,
+                 lambda p: round(p.career_rpg, 1) >= 10.0),
+        Category("stat_8_apg",  "8+ APG en carrière",  Axis.STAT, 4,
+                 lambda p: round(p.career_apg, 1) >= 8.0),
     ])
 
     # ── CAREER ────────────────────────────────────────────────────────────────
@@ -1821,12 +1847,14 @@ def _build_categories(
                             and p.is_champion)),
 
         Category("combo_ppg20_apg8",
-                 "20+ PPG et 8+ AST", Axis.STAT, 4,
-                 lambda p: p.career_ppg >= 20.0 and p.career_apg >= 8.0),
+                 "20+ PPG et 8+ APG en carrière", Axis.STAT, 4,
+                 lambda p: (round(p.career_ppg, 1) >= 20.0
+                            and round(p.career_apg, 1) >= 8.0)),
 
         Category("combo_rpg10_apg5",
-                 "10+ REB et 5+ AST", Axis.STAT, 5,
-                 lambda p: p.career_rpg >= 10.0 and p.career_apg >= 5.0),
+                 "10+ RPG et 5+ APG en carrière", Axis.STAT, 5,
+                 lambda p: (round(p.career_rpg, 1) >= 10.0
+                            and round(p.career_apg, 1) >= 5.0)),
 
         Category("combo_r2_allstar",
                  "2e tour + All-Star", Axis.DRAFT, 3,
