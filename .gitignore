@@ -25,9 +25,9 @@ nba_api-master/
 # Venv pour fetch_live_data.py (recréable via `python -m venv .venv`)
 .venv/
 
-# Artefact généré par python3 nba_bingo_grid.py — régénéré à chaque build
-frontend/public/game.json
-partykit/src/games.json
+# Artefact généré par python3 nba_bingo_grid.py.
+# On le commit pour que la CI PartyKit puisse builder sans Python+nba_api.
+# Régénère-le et commit quand tu veux refresh le pool.
 
 # Variables Vite locales
 frontend/.env
