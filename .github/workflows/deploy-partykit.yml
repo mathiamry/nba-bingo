@@ -1,0 +1,47 @@
+name: Deploy PartyKit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - "partykit/**"
+      - ".github/workflows/deploy-partykit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-partykit
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: partykit/.nvmrc
+          cache: npm
+          cache-dependency-path: |
+            partykit/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install partykit deps
+        working-directory: partykit
+        run: npm ci
+
+      - name: Deploy to PartyKit
+        working-directory: partykit
+        env:
+          PARTYKIT_LOGIN: ${{ secrets.PARTYKIT_LOGIN }}
+          PARTYKIT_TOKEN: ${{ secrets.PARTYKIT_TOKEN }}
+        run: npm run deploy
