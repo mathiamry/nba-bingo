@@ -6,6 +6,7 @@ import GridCell from './GridCell.vue'
 import PlayerCard from './PlayerCard.vue'
 import StatusBanner from './StatusBanner.vue'
 import Leaderboard from './Leaderboard.vue'
+import CountdownOverlay from './CountdownOverlay.vue'
 
 const props = defineProps({
   roomCode: { type: String, required: true },
@@ -30,6 +31,7 @@ const {
   doneCount,
   totalPlayers,
   rules,
+  countdownSecondsLeft,
   timerProgress,
   myScore,
   myProvisionalScore,
@@ -118,6 +120,18 @@ const reconnecting = computed(
 </script>
 
 <template>
+  <!--
+    Countdown pre-game — overlay plein écran z-50 qui se monte au passage
+    en phase "countdown" et se démonte dès qu'on tombe à 0 ou qu'on entre
+    en "playing". Le serveur drive le temps absolu, donc tous les clients
+    voient le même chiffre au même instant (cf. countdownSecondsLeft dans
+    le store, basé sur countdownEndsAt - serverTime).
+  -->
+  <CountdownOverlay
+    v-if="serverPhase === 'countdown' && countdownSecondsLeft > 0"
+    :seconds-left="countdownSecondsLeft"
+  />
+
   <main class="w-full max-w-lg px-3 mt-3 flex flex-col gap-3">
     <!--
       Bandeau room : affiché UNIQUEMENT en lobby (pour partager le code/lien

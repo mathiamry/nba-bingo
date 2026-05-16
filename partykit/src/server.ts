@@ -57,7 +57,13 @@ const POOL = gamesPool as GamesPool;
 // "je passe sur Slack 5 min" ou "le navigateur a tué la WS en background".
 const STALE_PLAYER_TTL_MS = 10 * 60 * 1000;
 
-type Status = "lobby" | "playing" | "ended";
+type Status = "lobby" | "countdown" | "playing" | "ended";
+
+// Durée du countdown avant que la partie démarre. Server-driven pour que
+// tous les joueurs voient le même chiffre au même instant (à la latence
+// réseau près, ~50ms). Côté client, le ticker à 100ms du store calcule
+// le secondsLeft à partir de `countdownEndsAt - serverTime`.
+const COUNTDOWN_MS = 10_000;
 
 type Player = {
   id: string;
@@ -77,6 +83,10 @@ type RoomState = {
   players: Record<string, Player>;
   game: Game | null;
   startedAt: number; // ms epoch — pour calculer le temps de completion
+  // Instant absolu (ms epoch) où le countdown tombe à 0 et où la partie
+  // démarre. 0 = pas de countdown en cours. Server-driven pour que tous
+  // les clients voient exactement le même chiffre au même instant.
+  countdownEndsAt: number;
   // Progression INDIVIDUELLE par joueur (race async)
   playerTurnIndex: Record<string, number>;
   playerTurnEndsAt: Record<string, number>;
@@ -230,6 +240,9 @@ function viewForRecipient(
     currentPlayer,
     turnIndex: myTurn,
     turnEndsAt: myEndsAt,
+    // 0 hors phase countdown ; sinon ms epoch absolu. Le client convertit
+    // en secondsLeft via Math.ceil((countdownEndsAt - serverTime) / 1000).
+    countdownEndsAt: state.status === "countdown" ? state.countdownEndsAt : 0,
     serverTime: Date.now(),
     leaderboard,
     rules: POOL.rules,
@@ -241,6 +254,9 @@ function viewForRecipient(
 export default class NbaBingoServer implements Party.Server {
   state: RoomState;
   playerTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  // Timer du countdown global. Un seul à la fois ; armé par handleStart,
+  // désarmé si on retombe en lobby (ex : tous les joueurs partent).
+  countdownTimer: ReturnType<typeof setTimeout> | null = null;
   // Mapping conn.id ↔ sessionId pour permettre la reconnexion :
   // l'identité d'un joueur est portée par un sessionId stable côté client
   // (généré dans localStorage), pas par conn.id qui change à chaque WS.
@@ -258,6 +274,7 @@ export default class NbaBingoServer implements Party.Server {
       players: {},
       game: null,
       startedAt: 0,
+      countdownEndsAt: 0,
       playerTurnIndex: {},
       playerTurnEndsAt: {},
       playerDone: {},
@@ -442,19 +459,49 @@ export default class NbaBingoServer implements Party.Server {
     if (Object.keys(this.state.players).length === 0) return;
     if (POOL.games.length === 0) return;
 
+    // On choisit la grille tout de suite (pas après le countdown) :
+    // évite tout race "le host clique deux fois" et fige la partie.
     this.state.game = POOL.games[Math.floor(Math.random() * POOL.games.length)];
-    this.state.status = "playing";
-    this.state.startedAt = Date.now();
+    this.state.status = "countdown";
+    this.state.countdownEndsAt = Date.now() + COUNTDOWN_MS;
 
+    // Reset des progressions perso dès maintenant : si quelqu'un rejoint
+    // pendant le countdown il part avec un état propre.
     for (const id of Object.keys(this.state.players)) {
       this.state.placements[id] = [];
       this.state.playerTurnIndex[id] = 0;
       this.state.playerTurnEndsAt[id] = 0;
       this.state.playerDone[id] = false;
       this.state.playerCompletedAt[id] = 0;
+    }
+
+    this.clearCountdownTimer();
+    this.countdownTimer = setTimeout(() => this.beginGame(), COUNTDOWN_MS);
+    this.broadcast();
+  }
+
+  beginGame() {
+    this.clearCountdownTimer();
+    // Garde-fou : si on a quitté la phase countdown entre temps (reset
+    // lobby parce que tous les joueurs sont partis), on ne fait rien.
+    if (this.state.status !== "countdown") return;
+    if (!this.state.game) return;
+
+    this.state.status = "playing";
+    this.state.startedAt = Date.now();
+    this.state.countdownEndsAt = 0;
+
+    for (const id of Object.keys(this.state.players)) {
       this.beginPlayerTurn(id);
     }
     this.broadcast();
+  }
+
+  clearCountdownTimer() {
+    if (this.countdownTimer) {
+      clearTimeout(this.countdownTimer);
+      this.countdownTimer = null;
+    }
   }
 
   handleRestart(sender: Party.Connection) {
@@ -466,9 +513,11 @@ export default class NbaBingoServer implements Party.Server {
 
   resetToLobby() {
     for (const id of this.playerTimers.keys()) this.clearPlayerTimer(id);
+    this.clearCountdownTimer();
     this.state.status = "lobby";
     this.state.game = null;
     this.state.startedAt = 0;
+    this.state.countdownEndsAt = 0;
     for (const id of Object.keys(this.state.players)) {
       this.state.placements[id] = [];
       this.state.playerTurnIndex[id] = 0;

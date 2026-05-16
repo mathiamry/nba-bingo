@@ -86,6 +86,16 @@ export const useMultiplayerStore = defineStore('multiplayer', {
       if (!s.roomState || s.roomState.status !== 'playing') return 0
       return Math.max(0, (s.roomState.turnEndsAt || 0) - s.nowMs)
     },
+    // Secondes restantes du countdown pre-game, basées sur l'instant
+    // absolu (countdownEndsAt) envoyé par le serveur. ceil() pour que la
+    // dernière seconde affiche bien "1" avant de passer à 0 (au lieu d'un
+    // flash à "0" si floor()). 0 = pas de countdown en cours.
+    countdownSecondsLeft: (s) => {
+      if (!s.roomState || s.roomState.status !== 'countdown') return 0
+      const endsAt = s.roomState.countdownEndsAt || 0
+      if (!endsAt) return 0
+      return Math.max(0, Math.ceil((endsAt - s.nowMs) / 1000))
+    },
     timerProgress(state) {
       const total = (this.rules.secondsPerTurn || 10) * 1000
       if (total === 0) return 0
