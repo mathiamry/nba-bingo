@@ -3,5 +3,8 @@
   "name": "nba-bingo",
   "main": "src/server.ts",
   "compatibilityDate": "2024-09-01",
-  "serve": "../frontend/dist"
+  "serve": {
+    "path": "../frontend/dist",
+    "browserTTL": 0
+  }
 }
