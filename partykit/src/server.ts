@@ -65,6 +65,30 @@ type Status = "lobby" | "countdown" | "playing" | "ended";
 // le secondsLeft à partir de `countdownEndsAt - serverTime`.
 const COUNTDOWN_MS = 10_000;
 
+// Origins autorisés pour ouvrir une WebSocket sur le party. Évite qu'un
+// site tiers (embed publicitaire ou bot) ne fasse connecter ses visiteurs
+// à nos rooms. En dev, on accepte localhost/127.0.0.1 sur n'importe quel
+// port (Vite à 5173, partykit dev à 1999, etc.). En prod on n'accepte que
+// le domaine partykit officiel + les domaines custom listés ici.
+const ALLOWED_ORIGINS: ReadonlyArray<string> = [
+  "https://nba-bingo.mathiamry.partykit.dev",
+];
+const LOCAL_ORIGIN_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+function isOriginAllowed(origin: string | null): boolean {
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.includes(origin)) return true;
+  return LOCAL_ORIGIN_PATTERN.test(origin);
+}
+
+// Token bucket par connexion — protège contre les bots qui spammeraient
+// place/skip/join pour saturer le Durable Object ou saboter une partie.
+// Un joueur légitime clique au max 1 fois par tour (~10s) → consomme
+// ~0.1 token/sec, largement sous le plafond. Un attaquant qui envoie en
+// boucle est plafonné à RATE messages/sec après avoir épuisé le burst.
+const RATE_LIMIT_BURST = 8;
+const RATE_LIMIT_PER_SEC = 4;
+
 type Player = {
   id: string;
   name: string;
@@ -158,11 +182,17 @@ function viewForRecipient(
     }
   }
 
-  // Joueur actuel = sequence[mon turnIndex] (chacun voit le sien)
-  const currentPlayer =
+  // Joueur actuel = sequence[mon turnIndex] (chacun voit le sien).
+  // ⚠️  On expose UNIQUEMENT id + name. `validCellIds` (la réponse !) reste
+  // côté serveur. Sinon n'importe qui ouvre DevTools, lit l'état Pinia, et
+  // sait quelle case cliquer.
+  const currentEntry =
     state.game && state.status === "playing" && !myDone
       ? state.game.sequence[myTurn] ?? null
       : null;
+  const currentPlayer = currentEntry
+    ? { id: currentEntry.id, name: currentEntry.name }
+    : null;
 
   // Map cellId → points pour le calcul de score (variable par case selon
   // la difficulté, somme exacte = 60).
@@ -266,6 +296,19 @@ export default class NbaBingoServer implements Party.Server {
   // se ferme, désarmés à la reconnexion. Si jamais ils explosent, on
   // retire vraiment le joueur (libère le slot host le cas échéant).
   staleCleanupTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  // Token bucket par connexion pour le rate limit anti-spam. Cleanup en
+  // onClose pour pas leak en mémoire.
+  rateBuckets: Map<string, { tokens: number; lastRefill: number }> = new Map();
+
+  // Rejette les WS qui viennent d'une origin non autorisée. Hook statique
+  // exécuté avant l'upgrade — pas de session, pas de Durable Object touché.
+  static onBeforeConnect(req: Party.Request): Party.Request | Response {
+    const origin = req.headers.get("Origin");
+    if (!isOriginAllowed(origin)) {
+      return new Response("Forbidden origin", { status: 403 });
+    }
+    return req;
+  }
 
   constructor(readonly room: Party.Room) {
     this.state = {
@@ -298,6 +341,7 @@ export default class NbaBingoServer implements Party.Server {
   onClose(conn: Party.Connection) {
     const sessionId = this.sessionByConn.get(conn.id);
     this.sessionByConn.delete(conn.id);
+    this.rateBuckets.delete(conn.id);
     if (!sessionId) return;
     const conns = this.connsBySession.get(sessionId);
     if (conns) {
@@ -320,7 +364,37 @@ export default class NbaBingoServer implements Party.Server {
     this.broadcast();
   }
 
+  // Token bucket : renvoie true si la connexion a le droit d'envoyer un
+  // message, false si elle dépasse le rate limit. Refill linéaire à
+  // RATE_LIMIT_PER_SEC tokens/sec, plafond à RATE_LIMIT_BURST.
+  private allowMessage(connId: string): boolean {
+    const now = Date.now();
+    const bucket = this.rateBuckets.get(connId);
+    if (!bucket) {
+      this.rateBuckets.set(connId, { tokens: RATE_LIMIT_BURST - 1, lastRefill: now });
+      return true;
+    }
+    const elapsedSec = (now - bucket.lastRefill) / 1000;
+    const refilled = Math.min(
+      RATE_LIMIT_BURST,
+      bucket.tokens + elapsedSec * RATE_LIMIT_PER_SEC,
+    );
+    if (refilled < 1) {
+      bucket.tokens = refilled;
+      bucket.lastRefill = now;
+      return false;
+    }
+    bucket.tokens = refilled - 1;
+    bucket.lastRefill = now;
+    return true;
+  }
+
   onMessage(raw: string, sender: Party.Connection) {
+    if (!this.allowMessage(sender.id)) return;
+    // Hard cap sur la taille du payload : un join/place/skip légitime
+    // tient largement en < 256 bytes (sessionId 64c + nom 24c + champs).
+    // Au-delà c'est forcément un abus.
+    if (raw.length > 512) return;
     let msg: any;
     try {
       msg = JSON.parse(raw);

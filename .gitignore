@@ -24,6 +24,7 @@ nba_api-master/
 
 # Venv pour fetch_live_data.py (recréable via `python -m venv .venv`)
 .venv/
+.venv-fresh/
 
 # Artefact généré par python3 nba_bingo_grid.py.
 # On le commit pour que la CI PartyKit puisse builder sans Python+nba_api.

@@ -946,6 +946,32 @@ def _print_grid(grid: Grid) -> None:
 NUM_GAMES_TO_EXPORT = 20
 
 
+def _generate_pool(categories, players, rng, count: int, *, label: str):
+    """Génère `count` parties équilibrées. Renvoie la liste des dicts game."""
+    print(f"\n🎲 Pool {label} — génération de {count} parties...")
+    pool = []
+    for i in range(count):
+        try:
+            grid, stats, sequence = generate_balanced_grid(
+                categories, players, rng=rng, with_shared_sequence=True,
+            )
+        except RuntimeError as e:
+            print(f"   ⚠️  {label} #{i + 1} échouée : {e}")
+            continue
+        if not sequence:
+            continue
+        pool.append(_build_game_dict(grid, players, sequence, stats=stats))
+        diffs = Counter(c.difficulty for c in grid.cells)
+        axes = Counter(c.axis.value for c in grid.cells)
+        suffix = (f", médiane {stats['median_turns']}t"
+                  if "median_turns" in stats else "")
+        print(
+            f"   ✓ {label} #{i + 1} — {len(sequence)} joueurs, "
+            f"axes {dict(axes)}, diffs {dict(sorted(diffs.items()))}{suffix}"
+        )
+    return pool
+
+
 if __name__ == "__main__":
     import argparse as _argparse
 
@@ -988,53 +1014,44 @@ if __name__ == "__main__":
     axis_counts = Counter(c.axis for c in categories)
     print(f"📐 Catégories par axe : {dict(axis_counts)}")
 
-    print(f"\n🎲 Génération de {NUM_GAMES_TO_EXPORT} parties...")
-    games = []
-    for i in range(NUM_GAMES_TO_EXPORT):
-        try:
-            grid, stats, sequence = generate_balanced_grid(
-                categories, players, rng=rng, with_shared_sequence=True,
-            )
-        except RuntimeError as e:
-            print(f"   ⚠️  Partie {i + 1} échouée : {e}")
-            continue
-        if not sequence:
-            continue
-        games.append(_build_game_dict(grid, players, sequence, stats=stats))
-        diffs = Counter(c.difficulty for c in grid.cells)
-        axes = Counter(c.axis.value for c in grid.cells)
-        suffix = (f", médiane {stats['median_turns']}t"
-                  if "median_turns" in stats else "")
-        print(
-            f"   ✓ Partie {i + 1} — {len(sequence)} joueurs, "
-            f"axes {dict(axes)}, diffs {dict(sorted(diffs.items()))}{suffix}"
-        )
+    # Deux pools INDÉPENDANTS :
+    #   - solo : sert frontend/public/game.json (public, embarque les
+    #     validCellIds nécessaires à la validation client-side du mode solo).
+    #   - multi : sert partykit/src/games.json, bundlé dans le worker
+    #     PartyKit, JAMAIS exposé en static. Tirage distinct du pool solo
+    #     pour qu'un cheater qui télécharge le JSON public ne reconnaisse
+    #     pas les grilles multi (donc ne connaisse pas les bonnes cases).
+    solo_games = _generate_pool(
+        categories, players, rng, NUM_GAMES_TO_EXPORT, label="SOLO",
+    )
+    multi_games = _generate_pool(
+        categories, players, rng, NUM_GAMES_TO_EXPORT, label="MULTI",
+    )
 
-    if not games:
-        print("❌ Aucune partie générée. Vérifie le catalogue de catégories.")
+    if not solo_games or not multi_games:
+        print("❌ Au moins un des deux pools est vide. Vérifie le catalogue.")
         raise SystemExit(1)
 
-    # Aperçu de la première grille pour debug
+    # Aperçu de la première grille solo pour debug
     print()
-    print("Aperçu de la première grille :")
+    print("Aperçu de la première grille (pool solo) :")
     cells_first = [
         Category(
             id=c["id"], label=c["label"],
             axis=Axis(c["axis"]), difficulty=c["difficulty"],
             predicate=lambda _p: False,
         )
-        for c in games[0]["cells"]
+        for c in solo_games[0]["cells"]
     ]
     _print_grid(Grid(cells=cells_first))
 
-    out_path = "frontend/public/game.json"
-    export_games_to_json(games, out_path)
-    print(f"\n💾 {len(games)} parties exportées vers {out_path}")
+    solo_path = "frontend/public/game.json"
+    export_games_to_json(solo_games, solo_path)
+    print(f"\n💾 {len(solo_games)} parties solo → {solo_path} (public)")
 
-    # Le serveur PartyKit (multijoueur) a besoin du même pool.
-    party_path = "partykit/src/games.json"
-    if os.path.isdir(os.path.dirname(party_path)):
-        export_games_to_json(games, party_path)
-        print(f"   ↳ aussi vers {party_path} (PartyKit)")
+    multi_path = "partykit/src/games.json"
+    if os.path.isdir(os.path.dirname(multi_path)):
+        export_games_to_json(multi_games, multi_path)
+        print(f"💾 {len(multi_games)} parties multi → {multi_path} (privé, bundlé)")
 
     print(f"   Score parfait par grille : {TOTAL_PERFECT_SCORE} pts")
