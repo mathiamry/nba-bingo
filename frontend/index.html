@@ -4,22 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>NBA Bingo</title>
+    <!--
+      Content Security Policy : tout est self-hosted sauf les Google Fonts.
+      'unsafe-inline' sur style-src est requis par Vue (attributs `style="..."`
+      dans les templates) ; on l'évite sur script-src grâce au swap des
+      fontes déplacé dans main.js. frame-ancestors 'none' verrouille
+      l'embed (en plus de X-Frame-Options: DENY envoyé par PartyKit).
+      connect-src couvre prod (*.partykit.dev), embeds custom à venir, et
+      dev (ws://localhost:*).
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' wss://*.partykit.dev https://*.partykit.dev ws://localhost:* ws://127.0.0.1:*; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!--
-      Google Fonts en non-blocking : on charge la feuille en `media="print"`
-      (donc inerte tant qu'on n'imprime pas), puis on bascule en
-      `media="all"` une fois téléchargée. Le first paint n'est plus bloqué
-      par le TTFB de fonts.googleapis.com. Combiné avec `display=swap`, les
-      fontes apparaissent dès qu'elles arrivent.
+      Google Fonts en non-blocking : posée en media="print" (inerte), le
+      swap vers media="all" est fait dans main.js pour rester compatible
+      avec script-src 'self' (pas d'inline `onload=...`).
       Montserrat trimé à 400/500/600/700 — seules graisses utilisées.
       Fallback <noscript> pour les rares navigateurs sans JS.
     -->
     <link
+      id="google-fonts"
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700&display=swap"
       media="print"
-      onload="this.media='all'"
     />
     <noscript>
       <link

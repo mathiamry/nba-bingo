@@ -22,8 +22,20 @@ function persistName() {
 
 function makeCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // ambigus retirés
+  // 5 caractères dans un alphabet de 31 → ~28M combos. À 4 chars on tombait
+  // à ~924k, énumérable par un bot en quelques minutes. Tirage via
+  // crypto.getRandomValues quand dispo, sinon fallback Math.random.
+  const len = 5
+  let bytes
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    bytes = new Uint32Array(len)
+    crypto.getRandomValues(bytes)
+  }
   let s = ''
-  for (let i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)]
+  for (let i = 0; i < len; i++) {
+    const r = bytes ? bytes[i] : Math.floor(Math.random() * 0xffffffff)
+    s += chars[r % chars.length]
+  }
   return `NBA-${s}`
 }
 
