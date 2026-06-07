@@ -8,6 +8,7 @@ import StatusBanner from './components/StatusBanner.vue'
 import RecapModal from './components/RecapModal.vue'
 import HomeScreen from './components/HomeScreen.vue'
 import MultiplayerRoom from './components/MultiplayerRoom.vue'
+import LegalScreen from './components/LegalScreen.vue'
 
 // ─── Hash routing ────────────────────────────────────────────────────────
 function parseHash() {
@@ -17,6 +18,7 @@ function parseHash() {
     if (code) return { name: 'room', code }
   }
   if (raw === '/solo') return { name: 'solo' }
+  if (raw === '/legal') return { name: 'legal' }
   return { name: 'home' }
 }
 
@@ -113,6 +115,12 @@ onBeforeUnmount(() => {
       :key="route.code"
       :room-code="route.code"
       @leave="navigate('/')"
+    />
+
+    <!-- LEGAL (mentions légales + confidentialité) -->
+    <LegalScreen
+      v-else-if="route.name === 'legal'"
+      @back="navigate('/')"
     />
 
     <!-- SOLO -->

@@ -22,6 +22,11 @@ venv/
 basketball_reference_extracted/
 nba_api-master/
 
+# Cache des réponses NBA API (~5000 fichiers JSON). Repeuplé tout seul
+# par nba_bingo_grid.py au prochain run. Pas la peine de polluer le repo
+# avec — un clone frais redownload depuis l'API.
+nba_api_cache/
+
 # Venv pour fetch_live_data.py (recréable via `python -m venv .venv`)
 .venv/
 .venv-fresh/

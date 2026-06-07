@@ -97,7 +97,7 @@ function joinRoom() {
           <input
             v-model="joinCode"
             type="text"
-            placeholder="NBA-XXXX"
+            placeholder="NBA-XXXXX"
             class="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-center font-mono uppercase tracking-widest focus:outline-none focus:border-bingo-cell"
             @keydown.enter="joinRoom"
           />
@@ -115,5 +115,13 @@ function joinRoom() {
     <p class="text-[11px] text-center opacity-50">
       Le mode multijoueur synchronise les joueurs proposés — tout le monde voit le même au même moment, et le récap final classe les scores.
     </p>
+
+    <footer class="text-[11px] text-center opacity-40 mt-2 pb-3">
+      <a
+        href="#/legal"
+        class="hover:opacity-80 underline-offset-2 hover:underline"
+        @click.prevent="emit('navigate', '/legal')"
+      >Mentions légales & confidentialité</a>
+    </footer>
   </main>
 </template>
