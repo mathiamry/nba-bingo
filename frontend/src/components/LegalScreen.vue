@@ -80,6 +80,11 @@ const creditsBodyParts = computed(() => splitAround(t('legal.creditsBody'), 'nba
         <p class="text-xs opacity-70 mt-1">{{ t('legal.privacyServerHint') }}</p>
       </div>
 
+      <div class="bg-black/30 rounded-xl p-4 flex flex-col gap-2">
+        <p><strong>{{ t('legal.privacyAnalyticsTitle') }}</strong></p>
+        <p class="opacity-90">{{ t('legal.privacyAnalytics') }}</p>
+      </div>
+
       <p class="text-xs opacity-70">{{ t('legal.privacyFooter') }}</p>
     </section>
 

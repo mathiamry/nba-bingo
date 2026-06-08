@@ -89,6 +89,40 @@ function isOriginAllowed(origin: string | null): boolean {
 const RATE_LIMIT_BURST = 8;
 const RATE_LIMIT_PER_SEC = 4;
 
+// Analytics — ping events Plausible "game_started" / "game_finished"
+// quand une partie multi se lance / se termine. Toggle via env var pour
+// pas polluer le dashboard avec des events de dev. Le domaine côté
+// Plausible doit matcher le `domain` envoyé, sinon les events sont
+// silencieusement ignorés.
+const ANALYTICS_DOMAIN = "nba-bingo.mathiamry.partykit.dev";
+const ANALYTICS_ENDPOINT = "https://plausible.io/api/event";
+
+async function trackEvent(
+  enabled: boolean,
+  name: string,
+  props?: Record<string, string | number>,
+): Promise<void> {
+  if (!enabled) return;
+  try {
+    await fetch(ANALYTICS_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "nba-bingo-server/1.0",
+      },
+      body: JSON.stringify({
+        name,
+        url: `https://${ANALYTICS_DOMAIN}/`,
+        domain: ANALYTICS_DOMAIN,
+        props,
+      }),
+    });
+  } catch {
+    // Best-effort : on ne casse JAMAIS une partie pour un ping analytics
+    // raté (réseau, rate limit, Plausible down…).
+  }
+}
+
 type Player = {
   id: string;
   name: string;
@@ -554,6 +588,13 @@ export default class NbaBingoServer implements Party.Server {
     this.broadcast();
   }
 
+  // Analytics enabled via env var ANALYTICS_ENABLED (set "true" en prod via
+  // `partykit env set ANALYTICS_ENABLED true`). Décorrélé du code pour pas
+  // polluer le dashboard Plausible avec les events de dev local.
+  private get analyticsEnabled(): boolean {
+    return this.room.env?.ANALYTICS_ENABLED === "true";
+  }
+
   beginGame() {
     this.clearCountdownTimer();
     // Garde-fou : si on a quitté la phase countdown entre temps (reset
@@ -569,6 +610,12 @@ export default class NbaBingoServer implements Party.Server {
       this.beginPlayerTurn(id);
     }
     this.broadcast();
+
+    // Fire-and-forget : ping analytics. On n'attend PAS la promise pour
+    // ne pas retarder la broadcast aux joueurs.
+    trackEvent(this.analyticsEnabled, "game_started", {
+      players: Object.keys(this.state.players).length,
+    });
   }
 
   clearCountdownTimer() {
@@ -664,7 +711,40 @@ export default class NbaBingoServer implements Party.Server {
   endGame() {
     for (const id of this.playerTimers.keys()) this.clearPlayerTimer(id);
     this.state.status = "ended";
+
+    // Snapshot pour analytics AVANT le broadcast (qui peut être suivi
+    // d'un removePlayer asynchrone qui changerait les compteurs).
+    const playerIds = Object.keys(this.state.players);
+    const durationSec = this.state.startedAt
+      ? Math.round((Date.now() - this.state.startedAt) / 1000)
+      : 0;
+    // Score moyen calculé sur les joueurs qui ont vraiment placé
+    // quelque chose — un joueur qui pop la room et part avant la fin ne
+    // fausse pas la moyenne.
+    let totalScore = 0;
+    let scoredPlayers = 0;
+    if (this.state.game) {
+      const pointsByCell = new Map<string, number>();
+      for (const c of this.state.game.cells) pointsByCell.set(c.id, c.points);
+      for (const id of playerIds) {
+        const places = this.state.placements[id] || [];
+        if (places.length === 0) continue;
+        const score = places
+          .filter((p) => p.wasCorrect === true)
+          .reduce((s, p) => s + (pointsByCell.get(p.cellId!) ?? 0), 0);
+        totalScore += score;
+        scoredPlayers++;
+      }
+    }
+    const avgScore = scoredPlayers > 0 ? Math.round(totalScore / scoredPlayers) : 0;
+
     this.broadcast();
+
+    trackEvent(this.analyticsEnabled, "game_finished", {
+      players: playerIds.length,
+      duration_sec: durationSec,
+      avg_score: avgScore,
+    });
   }
 
   clearPlayerTimer(playerId: string) {

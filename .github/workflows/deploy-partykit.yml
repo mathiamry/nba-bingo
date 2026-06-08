@@ -44,4 +44,9 @@ jobs:
         env:
           PARTYKIT_LOGIN: ${{ secrets.PARTYKIT_LOGIN }}
           PARTYKIT_TOKEN: ${{ secrets.PARTYKIT_TOKEN }}
+          # VITE_CF_BEACON_TOKEN : token Cloudflare Web Analytics, injecte
+          # dans le bundle au build. Si vide ou non défini, le beacon ne
+          # s'embarque pas (pas de tracker chargé). Set-le dans GitHub
+          # Settings → Secrets → Actions sous le même nom.
+          VITE_CF_BEACON_TOKEN: ${{ secrets.VITE_CF_BEACON_TOKEN }}
         run: npm run deploy
