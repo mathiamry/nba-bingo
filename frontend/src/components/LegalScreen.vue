@@ -16,7 +16,7 @@ defineEmits(['back'])
       <h2 class="text-xl font-semibold">Mentions légales</h2>
       <p>
         NBA Bingo est un projet personnel développé par
-        <strong>Mathia M.</strong> et hébergé sur l'infrastructure
+        <strong>Elhadji Mamadou Thiam</strong> et hébergé sur l'infrastructure
         <a
           href="https://www.partykit.io"
           target="_blank"
