@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { CELL_STATUS } from '../stores/game.js'
+import { translateLabel } from '../i18n.js'
 
 const props = defineProps({
   cell: { type: Object, required: true },
@@ -148,12 +149,18 @@ const flagUrl = computed(() => {
 const imgLoaded = ref(true)
 function onImgError() { imgLoaded.value = false }
 
+// Label affiché après traduction (la longueur dépend de la locale ; on
+// recalcule font-size + tracking à partir de la version localisée).
+const displayedLabel = computed(
+  () => translateLabel(props.cell.label, props.cell.axis) || '',
+)
+
 // Adaptive label font size — Bebas Neue est condensé donc on peut se
 // permettre un cran de plus que Montserrat à largeur égale. Bumpé d'une
 // échelle pour matcher la lisibilité Football Bingo (cf. "PREMIER LEAGUE
 // GOLDEN BOOT" qui tient sur 3 lignes en text-lg sur leur grille mobile).
 const labelClass = computed(() => {
-  const n = (props.cell.label || '').length
+  const n = displayedLabel.value.length
   if (n > 26) return 'text-xs sm:text-sm'
   if (n > 20) return 'text-sm sm:text-base'
   if (n > 14) return 'text-sm sm:text-base'
@@ -163,7 +170,7 @@ const labelClass = computed(() => {
 
 // Label tracking: short labels breathe more
 const labelTracking = computed(() => {
-  const n = (props.cell.label || '').length
+  const n = displayedLabel.value.length
   if (n <= 8) return 'tracking-widest'
   if (n <= 14) return 'tracking-wide'
   return 'tracking-tight'
@@ -275,7 +282,7 @@ const playerNameClass = computed(() => {
           isEmpty ? 'text-white' : '',
         ]"
       >
-        {{ cell.label }}
+        {{ displayedLabel }}
       </div>
 
       <div

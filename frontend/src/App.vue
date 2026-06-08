@@ -9,6 +9,7 @@ import RecapModal from './components/RecapModal.vue'
 import HomeScreen from './components/HomeScreen.vue'
 import MultiplayerRoom from './components/MultiplayerRoom.vue'
 import LegalScreen from './components/LegalScreen.vue'
+import { t } from './i18n.js'
 
 // ─── Hash routing ────────────────────────────────────────────────────────
 function parseHash() {
@@ -99,7 +100,7 @@ onBeforeUnmount(() => {
       <h1
         class="text-3xl sm:text-4xl font-bebas tracking-widest uppercase"
         style="text-shadow: 0 2px 8px rgba(0,0,0,0.35);"
-      >NBA BINGO</h1>
+      >{{ t('appTitle') }}</h1>
     </header>
 
     <!-- HOME -->
@@ -131,7 +132,7 @@ onBeforeUnmount(() => {
       <div
         class="w-full py-1 sm:py-1.5 text-center text-xs sm:text-sm font-medium tracking-wide bg-bingo-banner"
       >
-        Mode solo — {{ rules.secondsPerTurn }}s par tour, grille parfaite : {{ rules.totalPerfectScore }} pts.
+        {{ t('solo.banner', { seconds: rules.secondsPerTurn, score: rules.totalPerfectScore }) }}
       </div>
 
       <main class="w-full max-w-lg mt-2 flex flex-col gap-2">
@@ -179,11 +180,10 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="error" class="mx-3 bg-bingo-cellLocked/20 border border-bingo-cellLocked rounded-xl p-4 text-sm">
-          Impossible de charger la partie : {{ error }}.<br />
-          Lance <code class="bg-black/40 px-1 rounded">python3 nba_bingo_grid.py</code> pour générer
-          <code class="bg-black/40 px-1 rounded">frontend/public/game.json</code>.
+          {{ t('solo.errorTitle', { err: error }) }}<br />
+          {{ t('solo.errorHint', { cmd: 'python3 nba_bingo_grid.py', file: 'frontend/public/game.json' }) }}
         </div>
-        <div v-else-if="!cells.length" class="text-center opacity-60 py-10">Chargement…</div>
+        <div v-else-if="!cells.length" class="text-center opacity-60 py-10">{{ t('solo.loading') }}</div>
       </main>
 
       <RecapModal

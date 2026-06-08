@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   show: { type: Boolean, default: false },
@@ -56,7 +57,7 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
       <div class="relative bg-bingo-bg border-2 border-bingo-cell rounded-2xl p-7 w-full max-w-sm shadow-2xl text-center">
         <button
           class="absolute top-3 right-3 w-8 h-8 rounded-full hover:bg-white/10 text-lg leading-none"
-          aria-label="Fermer"
+          :aria-label="t('common.close')"
           @click="$emit('close')"
         >
           ×
@@ -65,14 +66,14 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
         <!-- Saisie du nom -->
         <template v-if="editing">
           <h2 class="text-2xl font-bebas mb-1 uppercase tracking-widest">
-            Comment tu t'appelles ?
+            {{ t('recap.askName') }}
           </h2>
-          <p class="text-xs opacity-60 mb-5">On garde ton nom pour les prochaines parties.</p>
+          <p class="text-xs opacity-60 mb-5">{{ t('recap.saveHint') }}</p>
           <input
             ref="inputRef"
             v-model="inputName"
             class="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-center text-lg font-semibold focus:outline-none focus:border-bingo-cell"
-            placeholder="Ton prénom"
+            :placeholder="t('recap.namePlaceholder')"
             maxlength="24"
             @keydown.enter="submitName"
           />
@@ -81,32 +82,32 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
             class="mt-4 w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-2.5 rounded-lg hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-lg"
             @click="submitName"
           >
-            Voir mon score
+            {{ t('recap.showScore') }}
           </button>
         </template>
 
         <!-- Score -->
         <template v-else>
           <div class="text-xs uppercase tracking-widest opacity-60 mb-1">
-            {{ won ? 'Champion' : 'Joueur' }}
+            {{ won ? t('common.champion') : t('common.player') }}
           </div>
           <div class="text-3xl font-bebas tracking-wider mb-5 flex items-center justify-center gap-2">
             <span class="truncate max-w-[200px]">{{ playerName }}</span>
             <button
               class="text-xs opacity-50 hover:opacity-100 underline"
-              title="Modifier le nom"
+              :title="t('recap.editTooltip')"
               @click="startEdit"
             >
-              modifier
+              {{ t('recap.editName') }}
             </button>
           </div>
 
-          <div class="text-xs uppercase tracking-widest opacity-60 mb-1">Score</div>
+          <div class="text-xs uppercase tracking-widest opacity-60 mb-1">{{ t('common.score') }}</div>
           <div class="text-8xl font-bebas text-bingo-cell tabular-nums leading-none tracking-wide mb-1">
             {{ fmtScore }}
           </div>
           <div class="text-xs opacity-60 mb-6">
-            {{ placed }}/{{ total }} cases · {{ errorsCount }} erreur{{ errorsCount > 1 ? 's' : '' }}
+            {{ t(errorsCount > 1 ? 'recap.cellsAndErrorsPlural' : 'recap.cellsAndErrorsSingular', { placed, total, errors: errorsCount }) }}
           </div>
 
           <div class="flex flex-col gap-2">
@@ -114,13 +115,13 @@ const fmtScore = computed(() => Number(props.score.toFixed(2)))
               class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-2.5 rounded-lg hover:brightness-110 text-xl"
               @click="$emit('restart')"
             >
-              Rejouer
+              {{ t('status.restart') }}
             </button>
             <button
               class="w-full bg-white/10 text-white font-bebas uppercase tracking-widest py-2 rounded-lg hover:bg-white/20 text-base"
               @click="$emit('close')"
             >
-              Voir la grille
+              {{ t('recap.viewGrid') }}
             </button>
           </div>
         </template>

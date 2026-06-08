@@ -1,5 +1,28 @@
 <script setup>
+import { computed } from 'vue'
+import { t } from '../i18n.js'
+
 defineEmits(['back'])
+
+const AUTHOR = 'Elhadji Mamadou Thiam'
+const REPO_URL = 'https://github.com/mathiamry/nba-bingo'
+const PARTYKIT_URL = 'https://www.partykit.io'
+const NBA_API_URL = 'https://github.com/swar/nba_api'
+const CLEAR_CMD = 'localStorage.clear()'
+
+// Découpage des paragraphes localisés sur un mot-clé connu, pour insérer
+// un <a> ou un <code> au milieu sans `v-html` (incompatible avec la CSP).
+// `splitAround(text, kw)` renvoie [avant, après]. Si le mot-clé est absent
+// (string mal localisée), on retombe sur [text, ''] qui reste affichable.
+function splitAround(text, kw) {
+  const idx = text.indexOf(kw)
+  if (idx === -1) return [text, '']
+  return [text.slice(0, idx), text.slice(idx + kw.length)]
+}
+
+const mentionsP1Parts = computed(() => splitAround(t('legal.mentionsP1', { name: AUTHOR }), 'PartyKit'))
+const mentionsP2Parts = computed(() => splitAround(t('legal.mentionsP2'), 'GitHub'))
+const creditsBodyParts = computed(() => splitAround(t('legal.creditsBody'), 'nba_api'))
 </script>
 
 <template>
@@ -9,98 +32,66 @@ defineEmits(['back'])
       class="self-start text-xs uppercase tracking-widest opacity-70 hover:opacity-100"
       @click="$emit('back')"
     >
-      ← Retour
+      {{ t('legal.back') }}
     </button>
 
     <section class="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col gap-3">
-      <h2 class="text-xl font-semibold">Mentions légales</h2>
+      <h2 class="text-xl font-semibold">{{ t('legal.mentionsTitle') }}</h2>
       <p>
-        NBA Bingo est un projet personnel développé par
-        <strong>Elhadji Mamadou Thiam</strong> et hébergé sur l'infrastructure
-        <a
-          href="https://www.partykit.io"
+        {{ mentionsP1Parts[0] }}<a
+          :href="PARTYKIT_URL"
           target="_blank"
           rel="noopener noreferrer"
           class="underline"
-        >PartyKit</a>
-        (Cloudflare Workers).
+        >PartyKit</a>{{ mentionsP1Parts[1] }}
       </p>
       <p>
-        Le code source est public sur
-        <a
-          href="https://github.com/mathiamry/nba-bingo"
+        {{ mentionsP2Parts[0] }}<a
+          :href="REPO_URL"
           target="_blank"
           rel="noopener noreferrer"
           class="underline"
-        >GitHub</a>.
-        Pour toute question, signaler un bug ou demander la suppression
-        de données, ouvre une issue sur le dépôt.
+        >GitHub</a>{{ mentionsP2Parts[1] }}
       </p>
-      <p>
-        Le jeu est fourni « tel quel », à but ludique et gratuit. Aucune
-        garantie d'exactitude des données NBA ou de disponibilité du
-        service.
-      </p>
+      <p>{{ t('legal.mentionsP3') }}</p>
     </section>
 
     <section class="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col gap-3">
-      <h2 class="text-xl font-semibold">Confidentialité</h2>
-      <p class="opacity-90">
-        On essaye de collecter le strict minimum. Voici ce qui est stocké
-        et où :
-      </p>
+      <h2 class="text-xl font-semibold">{{ t('legal.privacyTitle') }}</h2>
+      <p class="opacity-90">{{ t('legal.privacyIntro') }}</p>
 
       <div class="bg-black/30 rounded-xl p-4 flex flex-col gap-2">
-        <p>
-          <strong>Sur ton appareil (localStorage)</strong>
-        </p>
+        <p><strong>{{ t('legal.privacyLocalTitle') }}</strong></p>
         <ul class="list-disc list-inside space-y-1 opacity-90">
-          <li>Ton pseudo (24 caractères max)</li>
-          <li>Un identifiant de session aléatoire (UUID), utilisé pour
-            que tu retrouves ta place si tu changes d'onglet ou que ta
-            connexion saute</li>
+          <li>{{ t('legal.privacyLocal1') }}</li>
+          <li>{{ t('legal.privacyLocal2') }}</li>
         </ul>
         <p class="text-xs opacity-70 mt-1">
-          Pour effacer : Réglages navigateur → Données de site → vider.
-          Ou tape <code class="bg-black/40 px-1 rounded">localStorage.clear()</code>
-          dans la console.
+          {{ t('legal.privacyLocalHintBefore') }}<code class="bg-black/40 px-1 rounded">{{ CLEAR_CMD }}</code>{{ t('legal.privacyLocalHintAfter') }}
         </p>
       </div>
 
       <div class="bg-black/30 rounded-xl p-4 flex flex-col gap-2">
-        <p>
-          <strong>Sur le serveur (en mémoire uniquement)</strong>
-        </p>
+        <p><strong>{{ t('legal.privacyServerTitle') }}</strong></p>
         <ul class="list-disc list-inside space-y-1 opacity-90">
-          <li>Ton pseudo + ton identifiant de session, le temps de la
-            partie multijoueur</li>
-          <li>Tes placements et ton score, pour le leaderboard</li>
+          <li>{{ t('legal.privacyServer1') }}</li>
+          <li>{{ t('legal.privacyServer2') }}</li>
         </ul>
-        <p class="text-xs opacity-70 mt-1">
-          Ces données sont effacées automatiquement quand la room se
-          vide. Rien n'est persisté en base ni partagé avec un tiers.
-        </p>
+        <p class="text-xs opacity-70 mt-1">{{ t('legal.privacyServerHint') }}</p>
       </div>
 
-      <p class="text-xs opacity-70">
-        Pas de cookies, pas de trackers, pas d'analytics, pas de pub.
-      </p>
+      <p class="text-xs opacity-70">{{ t('legal.privacyFooter') }}</p>
     </section>
 
     <section class="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col gap-3">
-      <h2 class="text-xl font-semibold">Crédits</h2>
+      <h2 class="text-xl font-semibold">{{ t('legal.creditsTitle') }}</h2>
       <p class="opacity-90">
-        Données joueurs et statistiques :
-        <a
-          href="https://github.com/swar/nba_api"
+        {{ creditsBodyParts[0] }}<a
+          :href="NBA_API_URL"
           target="_blank"
           rel="noopener noreferrer"
           class="underline"
-        >nba_api</a>
-        (basé sur stats.nba.com).
-        Logos des franchises : marques déposées de la NBA, utilisés à
-        titre informatif uniquement. NBA Bingo n'est ni affilié, ni
-        sponsorisé, ni approuvé par la NBA.
+        >nba_api</a>{{ creditsBodyParts[1] }}
       </p>
     </section>
   </main>

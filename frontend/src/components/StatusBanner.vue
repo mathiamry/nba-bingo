@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   ended: { type: Boolean, required: true },
@@ -11,8 +12,8 @@ const props = defineProps({
 defineEmits(['restart'])
 
 const message = computed(() => {
-  if (props.won) return 'BRAVO !'
-  if (props.ended) return 'TERMINÉ'
+  if (props.won) return t('status.bravo')
+  if (props.ended) return t('status.done')
   return null
 })
 
@@ -42,7 +43,7 @@ const tone = computed(() => {
       <span
         v-if="!ended"
         class="text-[10px] sm:text-xs uppercase tracking-[0.2em] opacity-70 mt-1"
-      >cases posées</span>
+      >{{ t('status.placed') }}</span>
     </div>
 
     <button
@@ -50,7 +51,7 @@ const tone = computed(() => {
       class="text-base sm:text-lg px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg bg-black/25 hover:bg-black/40 uppercase tracking-widest font-bebas"
       @click="$emit('restart')"
     >
-      Rejouer
+      {{ t('status.restart') }}
     </button>
   </div>
 </template>

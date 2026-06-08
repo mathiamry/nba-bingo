@@ -2,6 +2,7 @@
 import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMultiplayerStore, ConnStatus } from '../stores/multiplayer.js'
+import { t } from '../i18n.js'
 import GridCell from './GridCell.vue'
 import PlayerCard from './PlayerCard.vue'
 import StatusBanner from './StatusBanner.vue'
@@ -145,18 +146,18 @@ const reconnecting = computed(
     >
       <button
         class="text-white/60 hover:text-white text-lg leading-none px-1"
-        title="Quitter la room"
+        :title="t('room.leave')"
         @click="leave"
       >←</button>
       <div class="flex-1 min-w-0">
-        <div class="text-[10px] uppercase tracking-widest opacity-60">Code de la room</div>
+        <div class="text-[10px] uppercase tracking-widest opacity-60">{{ t('room.code') }}</div>
         <div class="font-mono font-bold tracking-widest text-base truncate">{{ roomCode }}</div>
       </div>
       <button
         class="text-xs px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 uppercase tracking-wider font-semibold"
         @click="copyLink"
       >
-        {{ showCopied ? 'Copie ✓' : 'Lien' }}
+        {{ showCopied ? t('room.copied') : t('room.copyLink') }}
       </button>
     </div>
 
@@ -164,19 +165,19 @@ const reconnecting = computed(
     <button
       v-else
       class="self-start text-white/50 hover:text-white text-sm px-2 py-1 -ml-2"
-      title="Quitter la room"
+      :title="t('room.leave')"
       @click="leave"
-    >← Quitter</button>
+    >{{ t('room.back') }}</button>
 
     <!-- Saisie du nom si vide -->
     <div v-if="!playerName" class="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col gap-2">
-      <label class="text-xs uppercase tracking-widest opacity-60">Ton prénom</label>
+      <label class="text-xs uppercase tracking-widest opacity-60">{{ t('home.firstNameLabel') }}</label>
       <div class="flex gap-2">
         <input
           v-model="inputName"
           type="text"
           maxlength="24"
-          placeholder="Ex. Mathia"
+          :placeholder="t('home.firstNamePlaceholder')"
           class="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 focus:outline-none focus:border-bingo-cell"
           @keydown.enter="submitName"
         />
@@ -185,7 +186,7 @@ const reconnecting = computed(
           :disabled="!inputName.trim()"
           @click="submitName"
         >
-          Rejoindre
+          {{ t('room.joinName') }}
         </button>
       </div>
     </div>
@@ -195,11 +196,11 @@ const reconnecting = computed(
       v-if="fatalError"
       class="bg-bingo-cellLocked/20 border border-bingo-cellLocked rounded-xl p-3 text-sm flex items-center justify-between gap-3"
     >
-      <span>{{ error || 'Connexion fermée.' }}</span>
+      <span>{{ error || t('room.connectionClosed') }}</span>
       <button
         class="text-xs px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 uppercase tracking-wider font-semibold"
         @click="mp.connect(props.roomCode)"
-      >Réessayer</button>
+      >{{ t('common.retry') }}</button>
     </div>
 
     <!-- Coupure transitoire : petit badge non bloquant -->
@@ -208,19 +209,19 @@ const reconnecting = computed(
       class="bg-yellow-400/15 border border-yellow-400/40 rounded-lg px-3 py-1.5 text-xs flex items-center gap-2"
     >
       <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
-      <span class="opacity-80">Reconnexion…</span>
+      <span class="opacity-80">{{ t('room.reconnecting') }}</span>
     </div>
 
     <div
       v-else-if="connStatus === 'connecting' && playerName"
       class="text-center opacity-60 py-4 text-sm"
-    >Connexion à la room…</div>
+    >{{ t('room.connecting') }}</div>
 
     <!-- LOBBY -->
     <template v-if="serverPhase === 'lobby' && connStatus === 'connected'">
       <section class="bg-white/5 border border-white/10 rounded-xl p-4">
         <div class="text-xs uppercase tracking-widest opacity-60 mb-2">
-          Participants ({{ players.length }})
+          {{ t('room.participants', { count: players.length }) }}
         </div>
         <ul class="space-y-1.5">
           <li
@@ -232,18 +233,18 @@ const reconnecting = computed(
             <span
               class="w-2 h-2 rounded-full"
               :class="p.connected === false ? 'bg-yellow-400 animate-pulse' : 'bg-bingo-cell'"
-              :title="p.connected === false ? 'Déconnecté — peut revenir' : 'Connecté'"
+              :title="p.connected === false ? t('room.disconnectedTooltip') : t('room.connectedTooltip')"
             ></span>
             <span class="font-semibold truncate">{{ p.name }}</span>
-            <span v-if="p.id === selfId" class="opacity-60 text-xs">(toi)</span>
+            <span v-if="p.id === selfId" class="opacity-60 text-xs">{{ t('room.you') }}</span>
             <span
               v-if="p.connected === false"
               class="text-[10px] uppercase tracking-wider text-yellow-400/90"
-            >reconnexion…</span>
+            >{{ t('room.disconnectedTag') }}</span>
             <span
               v-if="p.id === mp.roomState?.hostId"
               class="ml-auto text-[10px] uppercase tracking-wider bg-bingo-cell/20 text-bingo-cell px-1.5 py-0.5 rounded"
-            >Host</span>
+            >{{ t('common.host') }}</span>
           </li>
         </ul>
       </section>
@@ -253,9 +254,9 @@ const reconnecting = computed(
         class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-3 rounded-xl hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed text-xl"
         :disabled="players.length === 0"
         @click="mp.start()"
-      >Lancer la partie</button>
+      >{{ t('room.startGame') }}</button>
       <p v-else class="text-center text-sm opacity-60 py-2">
-        En attente du host pour lancer…
+        {{ t('room.waitingHost') }}
       </p>
     </template>
 
@@ -295,19 +296,19 @@ const reconnecting = computed(
         class="bg-bingo-cell/10 border border-bingo-cell/40 rounded-2xl p-4 text-center"
       >
         <div class="text-bingo-cell font-bebas uppercase tracking-widest text-xl mb-2">
-          Tu as termine !
+          {{ t('room.youAreDone') }}
         </div>
         <div class="flex flex-col items-center mb-3">
-          <span class="text-[10px] uppercase tracking-widest opacity-60">Ton score</span>
+          <span class="text-[10px] uppercase tracking-widest opacity-60">{{ t('room.yourScore') }}</span>
           <span class="tabular-nums font-bebas text-bingo-cell text-5xl tracking-wide leading-none">{{ myScore }}</span>
           <span class="text-[10px] opacity-50 mt-0.5">/ {{ rules.totalPerfectScore }}</span>
         </div>
         <button
           class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-2.5 rounded-lg hover:brightness-110 text-base mb-2"
           @click="showRanking = true"
-        >Voir mon classement</button>
+        >{{ t('room.viewRanking') }}</button>
         <div class="text-xs opacity-70">
-          {{ doneCount }} / {{ totalPlayers }} ont fini
+          {{ t('room.doneCount', { n: doneCount, m: totalPlayers }) }}
         </div>
       </div>
 
@@ -355,7 +356,7 @@ const reconnecting = computed(
       <button
         class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-3 rounded-xl hover:brightness-110 text-xl"
         @click="showRanking = true"
-      >Voir le classement</button>
+      >{{ t('room.viewRankingEnded') }}</button>
 
       <!--
         Grille fin de partie : même layout que pendant le jeu (gap-px,
@@ -379,8 +380,8 @@ const reconnecting = computed(
         v-if="isHost"
         class="w-full bg-bingo-cell text-bingo-textDark font-bebas uppercase tracking-widest py-3 rounded-xl hover:brightness-110 text-xl"
         @click="mp.restart()"
-      >Rejouer (meme room)</button>
-      <p v-else class="text-center text-sm opacity-60">En attente du host pour rejouer…</p>
+      >{{ t('room.restart') }}</button>
+      <p v-else class="text-center text-sm opacity-60">{{ t('room.waitingRestart') }}</p>
     </template>
 
     <!--
@@ -398,10 +399,10 @@ const reconnecting = computed(
       <div class="w-full max-w-md bg-bingo-bg border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-cell-stamp">
         <!-- Header modal -->
         <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-          <span class="font-bebas uppercase tracking-widest text-xl">Classement</span>
+          <span class="font-bebas uppercase tracking-widest text-xl">{{ t('room.rankingTitle') }}</span>
           <button
             class="text-white/60 hover:text-white text-2xl leading-none px-1 -mr-1"
-            title="Fermer"
+            :title="t('common.close')"
             @click="showRanking = false"
           >×</button>
         </div>
@@ -413,7 +414,7 @@ const reconnecting = computed(
           class="border-0 rounded-none"
         />
         <div class="px-4 py-3 text-center text-xs opacity-60 border-t border-white/10">
-          {{ doneCount }} / {{ totalPlayers }} joueurs ont fini
+          {{ t('room.rankingDoneCount', { n: doneCount, m: totalPlayers }) }}
         </div>
       </div>
     </div>

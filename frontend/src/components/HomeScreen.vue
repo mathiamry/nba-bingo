@@ -1,6 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useMultiplayerStore } from '../stores/multiplayer.js'
+import { t, locale, setLocale } from '../i18n.js'
+
+function toggleLocale() {
+  setLocale(locale.value === 'fr' ? 'en' : 'fr')
+}
 
 defineProps({
   // Pour permettre au parent de pré-remplir le nom (depuis le solo store par ex.)
@@ -61,17 +66,17 @@ function joinRoom() {
 <template>
   <main class="w-full max-w-md px-3 mt-6 flex flex-col gap-5">
     <div class="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col gap-3">
-      <label class="text-xs uppercase tracking-widest opacity-60">Ton prénom</label>
+      <label class="text-xs uppercase tracking-widest opacity-60">{{ t('home.firstNameLabel') }}</label>
       <input
         v-model="name"
         @blur="persistName"
         @keydown.enter="persistName"
         type="text"
         maxlength="24"
-        placeholder="Ex. Mathia"
+        :placeholder="t('home.firstNamePlaceholder')"
         class="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2.5 text-lg font-semibold focus:outline-none focus:border-bingo-cell"
       />
-      <p class="text-[11px] opacity-50">Visible par tes amis dans la room. Mémorisé localement pour les prochaines parties.</p>
+      <p class="text-[11px] opacity-50">{{ t('home.firstNameHelp') }}</p>
     </div>
 
     <button
@@ -79,7 +84,7 @@ function joinRoom() {
       :disabled="!trimmedName"
       @click="startSolo"
     >
-      Jouer en solo
+      {{ t('home.solo') }}
     </button>
 
     <div class="grid grid-cols-1 gap-3">
@@ -88,16 +93,16 @@ function joinRoom() {
         :disabled="!trimmedName"
         @click="createRoom"
       >
-        Creer une room
+        {{ t('home.createRoom') }}
       </button>
 
       <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex flex-col gap-2">
-        <label class="text-xs uppercase tracking-widest opacity-60 px-1">Rejoindre une room</label>
+        <label class="text-xs uppercase tracking-widest opacity-60 px-1">{{ t('home.joinRoomLabel') }}</label>
         <div class="flex gap-2">
           <input
             v-model="joinCode"
             type="text"
-            placeholder="NBA-XXXXX"
+            :placeholder="t('home.joinPlaceholder')"
             class="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-center font-mono uppercase tracking-widest focus:outline-none focus:border-bingo-cell"
             @keydown.enter="joinRoom"
           />
@@ -106,22 +111,29 @@ function joinRoom() {
             :disabled="!trimmedName || !trimmedCode"
             @click="joinRoom"
           >
-            OK
+            {{ t('home.joinOk') }}
           </button>
         </div>
       </div>
     </div>
 
     <p class="text-[11px] text-center opacity-50">
-      Le mode multijoueur synchronise les joueurs proposés — tout le monde voit le même au même moment, et le récap final classe les scores.
+      {{ t('home.tagline') }}
     </p>
 
-    <footer class="text-[11px] text-center opacity-40 mt-2 pb-3">
+    <footer class="text-[11px] text-center opacity-50 mt-2 pb-3 flex items-center justify-center gap-3">
       <a
         href="#/legal"
-        class="hover:opacity-80 underline-offset-2 hover:underline"
+        class="hover:opacity-100 underline-offset-2 hover:underline"
         @click.prevent="emit('navigate', '/legal')"
-      >Mentions légales & confidentialité</a>
+      >{{ t('home.legal') }}</a>
+      <span class="opacity-30">·</span>
+      <button
+        type="button"
+        class="hover:opacity-100 underline-offset-2 hover:underline uppercase tracking-wider font-semibold"
+        :title="t('common.langLabel')"
+        @click="toggleLocale"
+      >{{ t('common.switchLang') }}</button>
     </footer>
   </main>
 </template>

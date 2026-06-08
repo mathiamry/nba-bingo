@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   player: { type: Object, default: null },
@@ -100,7 +101,7 @@ const timeDisplay = computed(() => Math.ceil(props.timeLeft))
       <span
         v-else
         class="text-2xl sm:text-3xl font-bebas uppercase opacity-60 leading-tight tracking-wider"
-      >EN ATTENTE</span>
+      >{{ t('playerCard.waiting') }}</span>
     </div>
 
     <!--
@@ -117,9 +118,9 @@ const timeDisplay = computed(() => Math.ceil(props.timeLeft))
         class="touch-manipulation text-2xl sm:text-3xl font-bebas uppercase tracking-widest leading-none disabled:opacity-30 disabled:cursor-not-allowed active:opacity-60 transition-opacity px-3 py-2 -mr-1"
         :disabled="!player"
         @click="$emit('skip')"
-      >SKIP</button>
+      >{{ t('common.skip') }}</button>
       <span class="text-sm sm:text-base font-bebas uppercase tracking-widest opacity-55 tabular-nums leading-none">
-        {{ remaining }}&nbsp;LEFT
+        {{ remaining }}&nbsp;{{ t('common.left') }}
       </span>
     </div>
 

@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   entries: { type: Array, default: () => [] },
@@ -73,11 +74,11 @@ function fmtMMSS(ms) {
           class="w-2 h-2 rounded-full"
           :class="reveal ? 'bg-white/40' : 'bg-bingo-cell animate-pulse'"
         ></span>
-        <span class="font-semibold tracking-widest">{{ reveal ? 'Final' : 'Live' }}</span>
+        <span class="font-semibold tracking-widest">{{ reveal ? t('common.final') : t('common.live') }}</span>
       </span>
-      <span class="w-14 sm:w-16 text-right">Time</span>
-      <span class="w-10 sm:w-12 text-right">Pld</span>
-      <span class="w-12 sm:w-14 text-right">Pts</span>
+      <span class="w-14 sm:w-16 text-right">{{ t('common.time') }}</span>
+      <span class="w-10 sm:w-12 text-right">{{ t('common.pld') }}</span>
+      <span class="w-12 sm:w-14 text-right">{{ t('common.pts') }}</span>
     </div>
 
     <ul class="divide-y divide-white/10">
@@ -103,13 +104,13 @@ function fmtMMSS(ms) {
             <span
               v-if="e.id === selfId"
               class="text-[10px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-black text-white font-bold flex-shrink-0"
-            >You</span>
+            >{{ t('common.you') }}</span>
             <span
               v-if="e.connected === false"
               class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-yellow-400/15 text-yellow-700"
               :class="e.id === selfId ? '' : 'text-yellow-300/90'"
-              title="Déconnecté"
-            >Off</span>
+              :title="t('room.disconnectedTooltip')"
+            >{{ t('common.off') }}</span>
           </span>
         </span>
 
@@ -132,7 +133,7 @@ function fmtMMSS(ms) {
         </template>
         <template v-else>
           <span class="flex-shrink-0 text-[10px] uppercase tracking-widest opacity-70 mr-2">
-            En cours
+            {{ t('leaderboard.inProgress') }}
           </span>
           <span class="w-10 sm:w-12 text-right tabular-nums font-bebas text-lg sm:text-xl tracking-wide opacity-80">
             {{ e.placed ?? 0 }}

@@ -10,6 +10,7 @@
  * les animations CSS repartent de zéro proprement.
  */
 import { computed, ref, watch } from 'vue'
+import { t } from '../i18n.js'
 
 const props = defineProps({
   secondsLeft: { type: Number, required: true },
@@ -36,7 +37,7 @@ const tier = computed(() => {
       :class="tier === 'final' ? 'animate-[overlay-pulse_500ms_ease-out_forwards]' : ''"
       role="status"
       aria-live="assertive"
-      :aria-label="`La partie commence dans ${secondsLeft} secondes`"
+      :aria-label="t('countdown.aria', { s: secondsLeft })"
     >
       <!-- Grain "parquet" — texture SVG inline pour ne pas dépendre d'un asset. -->
       <div class="absolute inset-0 opacity-[0.07] mix-blend-overlay pointer-events-none bg-noise"></div>
@@ -53,7 +54,7 @@ const tier = computed(() => {
 
       <!-- Header rail : "TIP-OFF IN" — kerning très large pour le rythme broadcast. -->
       <div class="relative font-bebas text-white/70 tracking-[0.5em] text-xs sm:text-sm uppercase mb-8 sm:mb-12 pl-[0.5em]">
-        Tip-off dans
+        {{ t('countdown.tipOff') }}
       </div>
 
       <!-- Centre : ring shot-clock + chiffre. Tout est en vmin pour rester compact sur mobile. -->
@@ -111,7 +112,7 @@ const tier = computed(() => {
 
       <!-- Footer rail : signature légère, équilibre la composition verticale. -->
       <div class="relative mt-8 sm:mt-12 font-bebas text-white/40 tracking-[0.4em] text-[10px] sm:text-xs uppercase">
-        NBA Bingo · Multiplayer
+        {{ t('countdown.footer') }}
       </div>
     </div>
   </Transition>
